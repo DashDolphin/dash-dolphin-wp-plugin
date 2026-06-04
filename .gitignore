@@ -46,3 +46,11 @@ wp-config.php
 # Note: If you wish to whitelist themes,
 # uncomment the next line
 #/wp-content/themes
+# Dash Dolphin: PHP/Composer dev artifacts
+/vendor/
+/composer.lock
+/.phpunit.cache
+/.phpunit.result.cache
+/dash-dolphin.zip
+/dash-dolphin/composer.lock
+/dash-dolphin/vendor/
