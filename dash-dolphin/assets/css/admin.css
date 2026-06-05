@@ -1,226 +1,459 @@
-/*
+/**
  * Dash Dolphin admin styles.
  *
- * Loaded only on the Dash Dolphin settings page (toplevel_page_dash-dolphin).
+ * v0.2.0 introduces:
+ *   - Branded hero header with the Dash Dolphin logo + gradient.
+ *   - Two-column shell: main content + right-rail marketing cards.
+ *   - Plan / status pills aligned with the dashboard's vocabulary.
  *
- * @package DashDolphin
- * @since   0.1.0
+ * Variables follow the logo palette (orange to magenta to violet).
  */
 
-.dd-wrap {
-	max-width: 1080px;
+:root {
+	--dd-bg: #f7f7fb;
+	--dd-card-bg: #ffffff;
+	--dd-card-border: #e3e3ec;
+	--dd-text: #1f1d2c;
+	--dd-text-muted: #5b5874;
+	--dd-text-soft: #8c89a4;
+	--dd-link: #6b21f5;
+	--dd-link-hover: #4f15c0;
+
+	--dd-brand-orange: #ff4f3c;
+	--dd-brand-pink: #ff2d8a;
+	--dd-brand-violet: #6b21f5;
+	--dd-brand-gradient: linear-gradient(135deg, #ff4f3c 0%, #ff2d8a 45%, #6b21f5 100%);
+	--dd-brand-gradient-soft: linear-gradient(135deg, rgba(255, 79, 60, 0.08) 0%, rgba(255, 45, 138, 0.08) 45%, rgba(107, 33, 245, 0.10) 100%);
+
+	--dd-success-bg: #def7ec;
+	--dd-success-fg: #03543f;
+	--dd-error-bg: #fde2e2;
+	--dd-error-fg: #9b1c1c;
+	--dd-info-bg: #e1effe;
+	--dd-info-fg: #1e429f;
+	--dd-muted-bg: #eceaf3;
+	--dd-muted-fg: #4a4763;
+
+	--dd-radius: 12px;
+	--dd-radius-sm: 8px;
+	--dd-shadow: 0 1px 2px rgba(31, 29, 44, 0.06), 0 4px 16px rgba(31, 29, 44, 0.04);
 }
 
-.dd-heading {
+/* ---------------------------------------------------------------------------
+ * Outer wrap and layout
+ * ------------------------------------------------------------------------- */
+
+.dd-wrap {
+	margin: 16px 20px 40px 2px;
+	color: var(--dd-text);
+}
+
+.dd-wrap * {
+	box-sizing: border-box;
+}
+
+.dd-layout {
+	display: grid;
+	grid-template-columns: minmax(0, 1fr) 320px;
+	gap: 24px;
+	align-items: start;
+}
+
+@media (max-width: 1100px) {
+	.dd-layout {
+		grid-template-columns: 1fr;
+	}
+}
+
+.dd-main {
+	min-width: 0;
+}
+
+.dd-aside {
+	display: flex;
+	flex-direction: column;
+	gap: 16px;
+}
+
+/* ---------------------------------------------------------------------------
+ * Hero header
+ * ------------------------------------------------------------------------- */
+
+.dd-hero {
+	position: relative;
+	background: var(--dd-brand-gradient);
+	color: #fff;
+	border-radius: var(--dd-radius);
+	padding: 22px 26px;
+	margin-bottom: 20px;
+	box-shadow: var(--dd-shadow);
+	display: flex;
+	align-items: center;
+	gap: 24px;
+	flex-wrap: wrap;
+	overflow: hidden;
+}
+
+.dd-hero::after {
+	/* Soft radial highlight in the top-right corner for depth. */
+	content: "";
+	position: absolute;
+	inset: -40% -20% auto auto;
+	width: 360px;
+	height: 360px;
+	background: radial-gradient(circle, rgba(255, 255, 255, 0.18) 0%, rgba(255, 255, 255, 0) 60%);
+	pointer-events: none;
+}
+
+.dd-hero-brand {
+	display: flex;
+	align-items: center;
+	gap: 18px;
+	flex: 1 1 auto;
+	min-width: 0;
+}
+
+.dd-hero-logo {
+	width: 64px;
+	height: 64px;
+	flex-shrink: 0;
+	border-radius: 50%;
+	background: rgba(255, 255, 255, 0.18);
+	padding: 6px;
+	box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+}
+
+.dd-hero-titles {
+	min-width: 0;
+}
+
+.dd-hero-eyebrow {
+	text-transform: uppercase;
+	letter-spacing: 0.12em;
+	font-size: 11px;
+	font-weight: 600;
+	opacity: 0.85;
 	margin-bottom: 4px;
 }
 
-.dd-subhead {
-	color: #50575e;
-	margin-top: 0;
-	margin-bottom: 16px;
+.dd-hero-title {
+	font-size: 26px;
+	font-weight: 700;
+	margin: 0;
+	color: #fff;
+	line-height: 1.2;
 }
 
-.dd-card {
-	background: #fff;
-	border: 1px solid #dcdcde;
-	border-radius: 6px;
-	padding: 16px 18px;
-	margin-bottom: 16px;
-	box-shadow: 0 1px 1px rgba(0, 0, 0, 0.02);
+.dd-hero-subtitle {
+	margin: 6px 0 0;
+	color: rgba(255, 255, 255, 0.88);
+	font-size: 14px;
+	max-width: 560px;
 }
 
-.dd-card--muted {
-	background: #f6f7f7;
-	color: #50575e;
+.dd-hero-chip {
+	position: relative;
+	background: rgba(255, 255, 255, 0.14);
+	border: 1px solid rgba(255, 255, 255, 0.25);
+	color: #fff;
+	border-radius: var(--dd-radius-sm);
+	padding: 12px 16px;
+	min-width: 220px;
+	backdrop-filter: blur(4px);
 }
 
-.dd-card--error {
-	border-color: #d63638;
-	background: #fcf0f1;
+.dd-hero-chip-label {
+	font-size: 10px;
+	text-transform: uppercase;
+	letter-spacing: 0.12em;
+	opacity: 0.8;
+	margin-bottom: 4px;
 }
 
-.dd-api-key-form .dd-label {
-	display: block;
+.dd-hero-chip-name {
 	font-weight: 600;
+	font-size: 15px;
 	margin-bottom: 6px;
+	word-break: break-word;
 }
 
-.dd-row {
+.dd-hero-chip-meta {
 	display: flex;
-	gap: 8px;
-	align-items: center;
+	gap: 6px;
 	flex-wrap: wrap;
 }
 
-.dd-input {
-	flex: 1 1 320px;
-	max-width: 520px;
+.dd-plan-pill,
+.dd-status-pill {
+	display: inline-block;
+	font-size: 11px;
+	font-weight: 600;
+	padding: 3px 8px;
+	border-radius: 999px;
+	background: rgba(255, 255, 255, 0.22);
+	color: #fff;
+	letter-spacing: 0.02em;
 }
 
-.dd-help {
-	color: #646970;
-	font-size: 12px;
-	margin: 8px 0 0;
+.dd-status-pill--active {
+	background: rgba(46, 204, 113, 0.28);
 }
 
-.dd-tabs {
-	margin-top: 16px;
+.dd-status-pill--inactive {
+	background: rgba(255, 255, 255, 0.22);
 }
 
-.dd-tab-content {
-	margin-top: 12px;
+.dd-status-pill--cancelled {
+	background: rgba(231, 76, 60, 0.32);
 }
+
+/* ---------------------------------------------------------------------------
+ * Sections and cards (main column)
+ * ------------------------------------------------------------------------- */
 
 .dd-section {
-	margin-bottom: 28px;
+	margin: 0 0 22px;
 }
 
 .dd-section-head {
 	display: flex;
-	align-items: baseline;
 	justify-content: space-between;
+	align-items: baseline;
 	gap: 12px;
-	flex-wrap: wrap;
 	margin-bottom: 10px;
 }
 
 .dd-h2 {
-	margin: 0 0 8px;
-	font-size: 16px;
+	font-size: 17px;
 	font-weight: 600;
+	margin: 0 0 10px;
+	color: var(--dd-text);
 }
 
-.dd-link {
+.dd-subhead {
+	color: var(--dd-text-muted);
+	margin: 0 0 14px;
 	font-size: 13px;
+}
+
+.dd-card {
+	background: var(--dd-card-bg);
+	border: 1px solid var(--dd-card-border);
+	border-radius: var(--dd-radius);
+	padding: 18px 20px;
+	box-shadow: var(--dd-shadow);
+	margin-bottom: 14px;
+}
+
+.dd-card--muted {
+	background: var(--dd-brand-gradient-soft);
+	border-style: dashed;
+	color: var(--dd-text-muted);
+}
+
+.dd-card--error {
+	background: var(--dd-error-bg);
+	border-color: #f5b7b7;
+	color: var(--dd-error-fg);
 }
 
 .dd-grid {
 	display: grid;
-	gap: 12px;
+	gap: 18px;
 }
 
 .dd-grid-3 {
 	grid-template-columns: repeat(3, minmax(0, 1fr));
 }
 
-@media (max-width: 720px) {
+@media (max-width: 700px) {
 	.dd-grid-3 {
 		grid-template-columns: 1fr;
 	}
 }
 
 .dd-stat {
-	padding: 4px 0;
+	min-width: 0;
 }
 
 .dd-stat-label {
 	font-size: 11px;
 	text-transform: uppercase;
-	letter-spacing: 0.04em;
-	color: #646970;
+	letter-spacing: 0.1em;
+	color: var(--dd-text-soft);
+	font-weight: 600;
 	margin-bottom: 4px;
 }
 
 .dd-stat-value {
-	font-size: 16px;
+	font-size: 18px;
 	font-weight: 600;
-	color: #1d2327;
+	color: var(--dd-text);
+	word-break: break-word;
 }
 
-.dd-table th,
-.dd-table td {
-	vertical-align: top;
-}
+/* ---------------------------------------------------------------------------
+ * Forms
+ * ------------------------------------------------------------------------- */
 
-.dd-table code.dd-code,
-.dd-code {
-	background: #f6f7f7;
-	padding: 3px 6px;
-	border-radius: 4px;
-	font-size: 12px;
-	word-break: break-all;
-}
-
-.dd-badge {
-	display: inline-block;
-	padding: 2px 8px;
-	border-radius: 999px;
-	font-size: 11px;
-	line-height: 1.6;
-	font-weight: 600;
-	color: #1d2327;
-	background: #f0f0f1;
-}
-
-.dd-badge--success {
-	background: #d1e7dd;
-	color: #0a4f2f;
-}
-
-.dd-badge--error {
-	background: #f8d7da;
-	color: #842029;
-}
-
-.dd-badge--info {
-	background: #cfe2ff;
-	color: #084298;
-}
-
-.dd-badge--muted {
-	background: #eef0f1;
-	color: #50575e;
-}
-
-.dd-steps {
-	margin: 0 0 8px 20px;
-	padding: 0;
-}
-
-.dd-steps li {
-	margin-bottom: 4px;
-}
-
-.dd-filter {
+.dd-api-key-form .dd-row {
 	display: flex;
-	gap: 8px;
+	gap: 10px;
 	align-items: center;
-	margin: 4px 0 16px;
 	flex-wrap: wrap;
+}
+
+.dd-label {
+	display: block;
+	font-weight: 600;
+	margin-bottom: 8px;
+	color: var(--dd-text);
 }
 
 .dd-label--inline {
 	display: inline-block;
-	margin: 0;
-	font-weight: 600;
+	margin-right: 8px;
+	margin-bottom: 0;
+}
+
+.dd-input {
+	min-width: 340px;
+	max-width: 100%;
+}
+
+.dd-help {
+	font-size: 12px;
+	color: var(--dd-text-muted);
+	margin: 10px 0 0;
+}
+
+.dd-link {
+	color: var(--dd-link);
+	text-decoration: none;
+	font-weight: 500;
+}
+
+.dd-link:hover,
+.dd-link:focus {
+	color: var(--dd-link-hover);
+	text-decoration: underline;
+}
+
+.dd-filter {
+	display: inline-flex;
+	align-items: center;
+	gap: 10px;
+	margin-bottom: 14px;
 }
 
 .dd-select {
-	min-width: 240px;
+	min-width: 220px;
 }
+
+/* ---------------------------------------------------------------------------
+ * Tables
+ * ------------------------------------------------------------------------- */
+
+.dd-table {
+	border-radius: var(--dd-radius);
+	overflow: hidden;
+	box-shadow: var(--dd-shadow);
+}
+
+.dd-table th {
+	font-weight: 600;
+	color: var(--dd-text);
+}
+
+.dd-table td {
+	vertical-align: top;
+}
+
+.dd-col-actions {
+	white-space: nowrap;
+	text-align: right;
+}
+
+.dd-code {
+	background: #f3f1fa;
+	border: 1px solid #e3e0f0;
+	padding: 4px 8px;
+	border-radius: 6px;
+	font-size: 13px;
+	font-family: ui-monospace, "SFMono-Regular", Menlo, monospace;
+	word-break: break-all;
+}
+
+/* ---------------------------------------------------------------------------
+ * Badges and pills
+ * ------------------------------------------------------------------------- */
+
+.dd-badge {
+	display: inline-block;
+	font-size: 11px;
+	font-weight: 600;
+	padding: 3px 9px;
+	border-radius: 999px;
+	background: var(--dd-muted-bg);
+	color: var(--dd-muted-fg);
+	letter-spacing: 0.01em;
+	margin-right: 4px;
+}
+
+.dd-badge--success {
+	background: var(--dd-success-bg);
+	color: var(--dd-success-fg);
+}
+
+.dd-badge--error {
+	background: var(--dd-error-bg);
+	color: var(--dd-error-fg);
+}
+
+.dd-badge--info {
+	background: var(--dd-info-bg);
+	color: var(--dd-info-fg);
+}
+
+.dd-badge--muted {
+	background: var(--dd-muted-bg);
+	color: var(--dd-muted-fg);
+}
+
+/* ---------------------------------------------------------------------------
+ * Steps list (Connections page)
+ * ------------------------------------------------------------------------- */
+
+.dd-steps {
+	padding-left: 20px;
+	margin: 0;
+}
+
+.dd-steps li {
+	margin-bottom: 8px;
+	color: var(--dd-text);
+}
+
+/* ---------------------------------------------------------------------------
+ * Accordion (Setup page)
+ * ------------------------------------------------------------------------- */
 
 .dd-accordion {
-	background: #fff;
-	border: 1px solid #dcdcde;
-	border-radius: 6px;
-	padding: 0;
+	background: var(--dd-card-bg);
+	border: 1px solid var(--dd-card-border);
+	border-radius: var(--dd-radius);
 	margin-bottom: 12px;
+	box-shadow: var(--dd-shadow);
 	overflow: hidden;
-}
-
-.dd-accordion[open] {
-	box-shadow: 0 1px 4px rgba(0, 0, 0, 0.04);
 }
 
 .dd-accordion-summary {
 	cursor: pointer;
-	padding: 12px 16px;
+	padding: 14px 18px;
 	display: flex;
 	align-items: center;
 	gap: 10px;
 	flex-wrap: wrap;
-	font-weight: 600;
 	list-style: none;
 }
 
@@ -230,10 +463,9 @@
 
 .dd-accordion-summary::before {
 	content: "▸";
-	display: inline-block;
-	width: 14px;
-	color: #646970;
+	color: var(--dd-text-soft);
 	transition: transform 0.15s ease;
+	display: inline-block;
 }
 
 .dd-accordion[open] .dd-accordion-summary::before {
@@ -241,32 +473,139 @@
 }
 
 .dd-accordion-title {
+	font-weight: 600;
+	color: var(--dd-text);
 	font-size: 14px;
 }
 
 .dd-guide-embed {
-	position: relative;
-	width: 100%;
-	padding-bottom: 62%;
-	background: #000;
+	border-top: 1px solid var(--dd-card-border);
+	background: #faf9fd;
+	padding: 0;
 }
 
 .dd-guide-embed iframe {
-	position: absolute;
-	inset: 0;
 	width: 100%;
-	height: 100%;
+	min-height: 520px;
 	border: 0;
+	display: block;
 }
 
 .dd-accordion-footer {
-	padding: 10px 16px 14px;
+	padding: 12px 18px;
+	border-top: 1px solid var(--dd-card-border);
 	margin: 0;
 	font-size: 13px;
 }
 
-.dd-copy.is-copied {
-	background: #d1e7dd;
-	border-color: #0a4f2f;
-	color: #0a4f2f;
+.dd-accordion-footer a {
+	color: var(--dd-link);
+	text-decoration: none;
+	font-weight: 500;
+}
+
+/* ---------------------------------------------------------------------------
+ * Right rail: marketing / quick-link cards
+ * ------------------------------------------------------------------------- */
+
+.dd-aside-card {
+	background: var(--dd-card-bg);
+	border: 1px solid var(--dd-card-border);
+	border-radius: var(--dd-radius);
+	padding: 18px 20px;
+	box-shadow: var(--dd-shadow);
+}
+
+.dd-aside-card--brand {
+	background: var(--dd-brand-gradient);
+	color: #fff;
+	border: 0;
+}
+
+.dd-aside-card-eyebrow {
+	font-size: 10px;
+	text-transform: uppercase;
+	letter-spacing: 0.14em;
+	font-weight: 700;
+	opacity: 0.85;
+	margin-bottom: 8px;
+}
+
+.dd-aside-card-title {
+	font-size: 16px;
+	font-weight: 700;
+	margin: 0 0 8px;
+	line-height: 1.3;
+}
+
+.dd-aside-card--brand .dd-aside-card-title {
+	color: #fff;
+}
+
+.dd-aside-card-body {
+	margin: 0 0 12px;
+	color: var(--dd-text-muted);
+	font-size: 13px;
+	line-height: 1.5;
+}
+
+.dd-aside-card--brand .dd-aside-card-body {
+	color: rgba(255, 255, 255, 0.92);
+}
+
+.dd-aside-card-cta {
+	display: inline-block;
+	background: #fff;
+	color: var(--dd-brand-violet);
+	border-radius: 999px;
+	padding: 6px 14px;
+	font-size: 12px;
+	font-weight: 600;
+	text-decoration: none;
+	border: 1px solid transparent;
+	transition: background 0.15s ease, color 0.15s ease;
+}
+
+.dd-aside-card-cta:hover,
+.dd-aside-card-cta:focus {
+	background: rgba(255, 255, 255, 0.88);
+	color: var(--dd-link-hover);
+}
+
+.dd-aside-card:not(.dd-aside-card--brand) .dd-aside-card-cta {
+	background: var(--dd-brand-violet);
+	color: #fff;
+}
+
+.dd-aside-card:not(.dd-aside-card--brand) .dd-aside-card-cta:hover {
+	background: var(--dd-link-hover);
+	color: #fff;
+}
+
+.dd-aside-card-list {
+	margin: 0;
+	padding: 0;
+	list-style: none;
+}
+
+.dd-aside-card-list li {
+	border-top: 1px solid var(--dd-card-border);
+	padding: 8px 0;
+	font-size: 13px;
+}
+
+.dd-aside-card-list li:first-child {
+	border-top: 0;
+	padding-top: 0;
+}
+
+.dd-aside-card-list a {
+	color: var(--dd-link);
+	text-decoration: none;
+	font-weight: 500;
+}
+
+.dd-aside-card-list a:hover {
+	color: var(--dd-link-hover);
+	text-decoration: underline;
 }
