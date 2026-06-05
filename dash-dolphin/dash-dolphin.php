@@ -33,14 +33,19 @@ define( 'DD_PLUGIN_DIR', plugin_dir_path( __FILE__ ) );
 define( 'DD_PLUGIN_URL', plugin_dir_url( __FILE__ ) );
 
 /**
- * Base URL for the Dash Dolphin API.
+ * Base URL for the Dash Dolphin API (Supabase project URL, no trailing slash).
  *
- * Developers can override this via the `dd_api_base_url` filter, e.g. for
- * pointing at a staging environment during development.
+ * The client appends `/functions/v1/<endpoint>` to this base. Defaults to the
+ * production Supabase project. Developers can override this via the
+ * `dd_api_base_url` filter to point at staging during development, e.g.
+ *
+ *     add_filter( 'dd_api_base_url', function () {
+ *         return 'https://dcunazzebgjqpjzikzqb.supabase.co';
+ *     } );
  *
  * @since 0.1.0
  */
-define( 'DD_API_BASE_URL', apply_filters( 'dd_api_base_url', 'https://api.dashdolphin.com' ) );
+define( 'DD_API_BASE_URL', apply_filters( 'dd_api_base_url', 'https://jsvbijuodbkquylaoqba.supabase.co' ) );
 
 // Bootstrap the plugin on plugins_loaded so all other plugins are available.
 require_once DD_PLUGIN_DIR . 'includes/class-dd-plugin.php';
