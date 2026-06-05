@@ -409,11 +409,19 @@ class DD_Settings_Page {
 	 * Hero header card: logo, product name, page title/subtitle, account chip.
 	 */
 	private function render_hero( string $title, string $subtitle ): void {
-		echo '<header class="dd-hero">';
+		// Inject the logo asset URL as a CSS custom property so admin.css can
+		// render it as a subtle watermark on the right side of the hero. The
+		// foreground <img.dd-hero-logo> stays in markup (hidden via CSS) to
+		// preserve alt text for screen readers.
+		$logo_url = $this->plugin->get_logo_url();
+		printf(
+			'<header class="dd-hero" style="--dd-hero-logo: url(%s);">',
+			esc_url( $logo_url )
+		);
 		echo '<div class="dd-hero-brand">';
 		printf(
 			'<img src="%s" alt="%s" class="dd-hero-logo" />',
-			esc_url( $this->plugin->get_logo_url() ),
+			esc_url( $logo_url ),
 			esc_attr__( 'Dash Dolphin logo', 'dash-dolphin' )
 		);
 		echo '<div class="dd-hero-titles">';
@@ -516,7 +524,7 @@ class DD_Settings_Page {
 		echo '<p class="dd-aside-card-body">' . esc_html__( 'Read setup guides, ping support, or talk to the Dash Dolphin team.', 'dash-dolphin' ) . '</p>';
 		printf(
 			'<a class="dd-aside-card-cta" href="%s" target="_blank" rel="noopener">%s</a>',
-			esc_url( 'https://dashdolphin.com/support' ),
+			esc_url( 'https://dashdolphin.com/help-support/' ),
 			esc_html__( 'Visit support', 'dash-dolphin' )
 		);
 		echo '</div>';

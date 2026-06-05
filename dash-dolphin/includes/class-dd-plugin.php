@@ -135,9 +135,13 @@ class DD_Plugin {
 	 * @since 0.2.0
 	 */
 	public function register_admin_menu(): void {
-		// Use the bundled Dash Dolphin logo as the top-level menu icon. It is
-		// already round and centered, so it sits cleanly in the sidebar.
-		$icon_url = DD_PLUGIN_URL . 'assets/images/dash-dolphin-logo.png';
+		// Tiny inline SVG dolphin icon for the WP admin sidebar. WordPress
+		// renders the menu icon at 20x20: passing the full PNG logo here makes
+		// WP render the asset at natural size and wrap the label below it (the
+		// regression seen in 0.2.0). Base64 SVG keeps the asset inline and
+		// scales cleanly. Fill matches the WP admin sidebar default (#a7aaad)
+		// and is recolored to white on hover/active by WP's admin stylesheet.
+		$icon_url = 'data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyNCAyNCIgZmlsbD0iI2E3YWFhZCI+PHBhdGggZD0iTTIyIDZjLS41LjUtMS41IDEtMi41IDEtMS41IDAtMi41LS41LTMuNS0xLjVDMTUgNC41IDE0IDQgMTIuNSA0IDEwIDQgOC41IDUuNSA4IDdjLTIgMC00IDEtNS41IDMuNUM1IDExIDcgMTEgOCAxMWMwIDIgMSA0IDMuNSA0LjVMMTAgMThjLS4zLjUgMCAxIC41IDFIMTNjLjUgMCAuOC0uMyAxLS43bDEuNS0zYzIuNS0uMyA0LTIgNC41LTQuMyAxIDAgMi0uMyAzLTEgLjUtLjMuNy0xIC41LTEuNS0uMi0uNS0uNy0uOC0xLjUtLjV6TTEwIDljLS41IDAtMS0uNS0xLTFzLjUtMSAxLTEgMSAuNSAxIDEtLjUgMS0xIDF6Ii8+PC9zdmc+';
 
 		add_menu_page(
 			__( 'Dash Dolphin', 'dash-dolphin' ),

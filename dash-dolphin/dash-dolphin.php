@@ -3,7 +3,7 @@
  * Plugin Name:       Dash Dolphin: SMS and Notification Alerts for WordPress Forms
  * Plugin URI:        https://dashdolphin.com/integrations/wordpress
  * Description:       Connect WordPress forms to your Dash Dolphin account. Get SMS and email alerts on every form submission, with smart inquiry summaries and smart filtering.
- * Version:           0.2.0
+ * Version:           0.2.1
  * Requires at least: 6.0
  * Requires PHP:      7.4
  * Author:            Dash Dolphin
@@ -21,7 +21,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 // Plugin version.
-define( 'DD_VERSION', '0.2.0' );
+define( 'DD_VERSION', '0.2.1' );
 
 // Absolute path to the plugin file.
 define( 'DD_PLUGIN_FILE', __FILE__ );
@@ -45,6 +45,10 @@ define( 'DD_PLUGIN_URL', plugin_dir_url( __FILE__ ) );
  *
  * @since 0.1.0
  */
+
+// === STAGING BUILD: auto-injected filters (registered BEFORE the define so the filter actually applies) ===
+// === END STAGING BUILD ===
+
 define( 'DD_API_BASE_URL', apply_filters( 'dd_api_base_url', 'https://jsvbijuodbkquylaoqba.supabase.co' ) );
 
 // Bootstrap the plugin on plugins_loaded so all other plugins are available.
