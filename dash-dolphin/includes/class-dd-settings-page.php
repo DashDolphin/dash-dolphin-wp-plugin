@@ -93,7 +93,7 @@ class DD_Settings_Page {
 	// -----------------------------------------------------------------------
 
 	/**
-	 * Dashboard page: account summary + recent inquiries.
+	 * Dashboard page: value-prop hero + account summary + recent inquiries.
 	 */
 	public function render_dashboard(): void {
 		if ( ! current_user_can( DD_Plugin::REQUIRED_CAP ) ) {
@@ -108,16 +108,20 @@ class DD_Settings_Page {
 			return;
 		}
 
+		// Value-prop panel: lead with WHY responding fast matters, not WHAT
+		// the plugin does. Stats are sourced from dashdolphin.com (Inquiry
+		// Connect Study, Velocity Research, industry benchmark).
+		$this->render_speed_value_prop();
+
 		$client      = $this->plugin->api_client();
 		$recent_resp = $client->get_recent_requests( 10 );
 
 		echo '<section class="dd-section">';
 		echo '<div class="dd-section-head">';
 		echo '<h2 class="dd-h2">' . esc_html__( 'Recent inquiries', 'dash-dolphin' ) . '</h2>';
-		printf(
-			'<a class="dd-link" href="%s" target="_blank" rel="noopener">%s</a>',
-			esc_url( $this->plugin->get_dashboard_url() . '/inquiries' ),
-			esc_html__( 'See all in dashboard', 'dash-dolphin' )
+		$this->render_dashboard_link(
+			$this->plugin->get_dashboard_url() . '/inquiries',
+			__( 'See all inquiries', 'dash-dolphin' )
 		);
 		echo '</div>';
 		if ( is_wp_error( $recent_resp ) ) {
@@ -129,6 +133,51 @@ class DD_Settings_Page {
 		echo '</section>';
 
 		$this->close_shell( DD_Plugin::PAGE_DASHBOARD );
+	}
+
+	/**
+	 * Speed-of-response value-prop panel.
+	 *
+	 * Sourced from dashdolphin.com's "Cost of Being Second" section. Stats
+	 * are presented as the three contrasting realities (industry average,
+	 * Dash Dolphin's window, conversion lift) plus a one-line proof of
+	 * outcome. Keeps the brand voice (no exclamation points, no em dashes,
+	 * no "AI" word, leads with outcomes).
+	 */
+	private function render_speed_value_prop(): void {
+		echo '<section class="dd-section dd-speed">';
+		echo '<div class="dd-speed-card">';
+		echo '<div class="dd-speed-eyebrow">' . esc_html__( 'Why speed wins', 'dash-dolphin' ) . '</div>';
+		echo '<h2 class="dd-speed-title">' . esc_html__( 'Speed is the entire sales process for service businesses.', 'dash-dolphin' ) . '</h2>';
+		echo '<p class="dd-speed-lede">' . esc_html__( 'The business that responds first wins the job. Dash Dolphin sends you a text in seconds, before your competitor checks their email.', 'dash-dolphin' ) . '</p>';
+
+		echo '<div class="dd-speed-stats">';
+		echo '<div class="dd-speed-stat">';
+		echo '<div class="dd-speed-stat-num">' . esc_html__( '78%', 'dash-dolphin' ) . '</div>';
+		echo '<div class="dd-speed-stat-label">' . esc_html__( 'of customers hire the first business that responds', 'dash-dolphin' ) . '</div>';
+		echo '<div class="dd-speed-stat-src">' . esc_html__( 'Inquiry Connect Study', 'dash-dolphin' ) . '</div>';
+		echo '</div>';
+
+		echo '<div class="dd-speed-stat">';
+		echo '<div class="dd-speed-stat-num">' . esc_html__( '391%', 'dash-dolphin' ) . '</div>';
+		echo '<div class="dd-speed-stat-label">' . esc_html__( 'more conversions when you respond within 1 minute', 'dash-dolphin' ) . '</div>';
+		echo '<div class="dd-speed-stat-src">' . esc_html__( 'Velocity Research', 'dash-dolphin' ) . '</div>';
+		echo '</div>';
+
+		echo '<div class="dd-speed-stat">';
+		echo '<div class="dd-speed-stat-num">' . esc_html__( '47 hrs', 'dash-dolphin' ) . '</div>';
+		echo '<div class="dd-speed-stat-label">' . esc_html__( 'average response time for a small business', 'dash-dolphin' ) . '</div>';
+		echo '<div class="dd-speed-stat-src">' . esc_html__( 'Industry benchmark', 'dash-dolphin' ) . '</div>';
+		echo '</div>';
+		echo '</div>'; // .dd-speed-stats
+
+		echo '<div class="dd-speed-proof">';
+		echo '<blockquote class="dd-speed-quote">' . esc_html__( 'We were closing maybe 1 or 2 out of 100 form requests. Now we are closing 9.5 out of 10.', 'dash-dolphin' ) . '</blockquote>';
+		echo '<cite class="dd-speed-cite">' . esc_html__( 'Tristan, Mile High Garage Door Specialists, Colorado', 'dash-dolphin' ) . '</cite>';
+		echo '</div>';
+
+		echo '</div>'; // .dd-speed-card
+		echo '</section>';
 	}
 
 	/**
@@ -167,10 +216,9 @@ class DD_Settings_Page {
 		echo '<section class="dd-section">';
 		echo '<div class="dd-section-head">';
 		echo '<h2 class="dd-h2">' . esc_html__( 'Connections', 'dash-dolphin' ) . '</h2>';
-		printf(
-			'<a class="dd-link" href="%s" target="_blank" rel="noopener">%s</a>',
-			esc_url( $dashboard . '/connections' ),
-			esc_html__( 'Manage in dashboard', 'dash-dolphin' )
+		$this->render_dashboard_link(
+			$dashboard . '/connections',
+			__( 'Manage connections in dashboard', 'dash-dolphin' )
 		);
 		echo '</div>';
 
@@ -406,26 +454,28 @@ class DD_Settings_Page {
 	}
 
 	/**
-	 * Hero header card: logo, product name, page title/subtitle, account chip.
+	 * Hero header card: logo wordmark + page title/subtitle, account chip.
+	 *
+	 * In v0.3.0 the official Dash Dolphin SVG wordmark replaces the previous
+	 * uppercase "DASH DOLPHIN" eyebrow text. We render the SVG inline so the
+	 * gradient fill survives without a fetch, and so the asset still has
+	 * proper alt text and a sensible height for screen readers. The SVG
+	 * itself is white-on-transparent and reads correctly on the dark hero
+	 * gradient. A subtle dolphin watermark continues to sit at the far right.
 	 */
 	private function render_hero( string $title, string $subtitle ): void {
-		// Inject the logo asset URL as a CSS custom property so admin.css can
-		// render it as a subtle watermark on the right side of the hero. The
-		// foreground <img.dd-hero-logo> stays in markup (hidden via CSS) to
-		// preserve alt text for screen readers.
 		$logo_url = $this->plugin->get_logo_url();
 		printf(
 			'<header class="dd-hero" style="--dd-hero-logo: url(%s);">',
 			esc_url( $logo_url )
 		);
 		echo '<div class="dd-hero-brand">';
-		printf(
-			'<img src="%s" alt="%s" class="dd-hero-logo" />',
-			esc_url( $logo_url ),
-			esc_attr__( 'Dash Dolphin logo', 'dash-dolphin' )
-		);
 		echo '<div class="dd-hero-titles">';
-		echo '<div class="dd-hero-eyebrow">' . esc_html__( 'Dash Dolphin', 'dash-dolphin' ) . '</div>';
+		printf(
+			'<img class="dd-hero-wordmark" src="%s" alt="%s" width="180" height="30" />',
+			esc_url( $logo_url ),
+			esc_attr__( 'Dash Dolphin', 'dash-dolphin' )
+		);
 		echo '<h1 class="dd-hero-title">' . esc_html( $title ) . '</h1>';
 		if ( '' !== $subtitle ) {
 			echo '<p class="dd-hero-subtitle">' . esc_html( $subtitle ) . '</p>';
@@ -505,16 +555,18 @@ class DD_Settings_Page {
 				esc_html__( 'Walkthroughs by platform', 'dash-dolphin' )
 			);
 		}
-		printf(
-			'<li><a href="%s" target="_blank" rel="noopener">%s</a></li>',
-			esc_url( $dashboard . '/inquiries' ),
-			esc_html__( 'Open inquiries in dashboard', 'dash-dolphin' )
+		echo '<li>';
+		$this->render_dashboard_link(
+			$dashboard . '/inquiries',
+			__( 'See all inquiries at app.dashdolphin.com', 'dash-dolphin' )
 		);
-		printf(
-			'<li><a href="%s" target="_blank" rel="noopener">%s</a></li>',
-			esc_url( $dashboard . '/api-keys' ),
-			esc_html__( 'Manage API keys', 'dash-dolphin' )
+		echo '</li>';
+		echo '<li>';
+		$this->render_dashboard_link(
+			$dashboard . '/api-keys',
+			__( 'Manage API keys at app.dashdolphin.com', 'dash-dolphin' )
 		);
+		echo '</li>';
 		echo '</ul>';
 		echo '</div>';
 
@@ -627,11 +679,12 @@ class DD_Settings_Page {
 		$this->render_stat( __( 'Plan', 'dash-dolphin' ), $plan !== '' ? ucfirst( $plan ) : '—' );
 		$this->render_stat( __( 'Status', 'dash-dolphin' ), $status !== '' ? ucfirst( $status ) : '—' );
 		echo '</div>';
-		printf(
-			'<p class="dd-help"><a href="%s" target="_blank" rel="noopener">%s</a></p>',
-			esc_url( $dashboard_url . '/settings/billing' ),
-			esc_html__( 'Manage billing in dashboard', 'dash-dolphin' )
+		echo '<p class="dd-help">';
+		$this->render_dashboard_link(
+			$dashboard_url . '/settings/billing',
+			__( 'Manage billing at app.dashdolphin.com', 'dash-dolphin' )
 		);
+		echo '</p>';
 	}
 
 	private function render_stat( string $label, string $value ): void {
@@ -658,12 +711,12 @@ class DD_Settings_Page {
 
 		$dashboard = $this->plugin->get_dashboard_url();
 
-		echo '<table class="widefat striped dd-table">';
+		echo '<table class="widefat striped dd-table dd-table--wp7">';
 		echo '<thead><tr>';
 		echo '<th>' . esc_html__( 'When', 'dash-dolphin' ) . '</th>';
 		echo '<th>' . esc_html__( 'Form', 'dash-dolphin' ) . '</th>';
 		echo '<th>' . esc_html__( 'Summary', 'dash-dolphin' ) . '</th>';
-		echo '<th>' . esc_html__( 'Alert', 'dash-dolphin' ) . '</th>';
+		echo '<th class="dd-col-alert">' . esc_html__( 'Alert', 'dash-dolphin' ) . '</th>';
 		echo '<th class="dd-col-actions"></th>';
 		echo '</tr></thead><tbody>';
 		foreach ( $rows as $row ) {
@@ -678,16 +731,15 @@ class DD_Settings_Page {
 			echo '<tr>';
 			echo '<td>' . esc_html( $this->format_relative_time( $created ) ) . '</td>';
 			echo '<td>' . esc_html( $form_name ) . '</td>';
-			echo '<td>' . esc_html( $summary !== '' ? $summary : __( '(no summary)', 'dash-dolphin' ) ) . '</td>';
-			echo '<td>' . wp_kses_post(
+			echo '<td class="dd-cell-summary">' . esc_html( $summary !== '' ? $summary : __( '(no summary)', 'dash-dolphin' ) ) . '</td>';
+			echo '<td class="dd-col-alert">' . wp_kses_post(
 				$this->render_alert_badge( $sms_sent, $sms_status, $processing_status, $summary )
 			) . '</td>';
 			echo '<td class="dd-col-actions">';
 			if ( $row_id !== '' ) {
-				printf(
-					'<a class="dd-link" href="%s" target="_blank" rel="noopener">%s</a>',
-					esc_url( $dashboard . '/inquiries/' . rawurlencode( $row_id ) ),
-					esc_html__( 'View details', 'dash-dolphin' )
+				$this->render_dashboard_link(
+					$dashboard . '/inquiries/' . rawurlencode( $row_id ),
+					__( 'View details', 'dash-dolphin' )
 				);
 			}
 			echo '</td>';
@@ -754,12 +806,12 @@ class DD_Settings_Page {
 			return;
 		}
 
-		echo '<table class="widefat striped dd-table">';
+		echo '<table class="widefat striped dd-table dd-table--wp7">';
 		echo '<thead><tr>';
 		echo '<th>' . esc_html__( 'Connection', 'dash-dolphin' ) . '</th>';
 		echo '<th>' . esc_html__( 'Connection Type', 'dash-dolphin' ) . '</th>';
 		echo '<th>' . esc_html__( 'Connection address', 'dash-dolphin' ) . '</th>';
-		echo '<th></th>';
+		echo '<th class="dd-col-actions"></th>';
 		echo '</tr></thead><tbody>';
 		foreach ( $connections as $conn ) {
 			$name      = isset( $conn['name'] ) ? (string) $conn['name'] : __( 'Untitled', 'dash-dolphin' );
@@ -769,8 +821,8 @@ class DD_Settings_Page {
 			echo '<tr>';
 			echo '<td>' . esc_html( $name ) . '</td>';
 			echo '<td>' . esc_html( $form_type !== '' ? $this->humanize_form_type( $form_type ) : '—' ) . '</td>';
-			echo '<td><code class="dd-code">' . esc_html( $address ) . '</code></td>';
-			echo '<td>';
+			echo '<td class="dd-cell-code"><code class="dd-code">' . esc_html( $address ) . '</code></td>';
+			echo '<td class="dd-col-actions">';
 			if ( $address !== '' ) {
 				printf(
 					'<button type="button" class="button dd-copy" data-dd-copy="%s">%s</button>',
@@ -787,6 +839,64 @@ class DD_Settings_Page {
 	// -----------------------------------------------------------------------
 	// Shared helpers
 	// -----------------------------------------------------------------------
+
+	/**
+	 * Render an outbound link that leaves the host (WordPress, or any other
+	 * surface this plugin gets embedded into in the future) and lands in the
+	 * Dash Dolphin web app.
+	 *
+	 * Three responsibilities:
+	 *
+	 *  1. Carry an external-link affordance, so the user sees they are about
+	 *     to leave the current admin surface (this is the v1 fix for the
+	 *     "View details just gave me a 404" report).
+	 *  2. Attach the connected account's name as a data attribute, so JS
+	 *     can show a one-time confirmation interstitial telling the user
+	 *     which account this link will open in. If the user is signed in
+	 *     to a different Dash Dolphin account in the same browser, the app
+	 *     itself will surface a "Switch account" prompt; this interstitial
+	 *     just lets them cancel before that.
+	 *  3. Stay host-agnostic. We intentionally don't reference WordPress or
+	 *     wp-admin here so the same component can be reused if we embed
+	 *     this UI in other CMSes later.
+	 *
+	 * @param string $url   Fully qualified destination URL.
+	 * @param string $label Visible link text.
+	 * @param string $extra Optional extra CSS classes.
+	 */
+	private function render_dashboard_link( string $url, string $label, string $extra = '' ): void {
+		$account_name = '';
+		$payload      = $this->get_account_payload();
+		if ( ! is_wp_error( $payload ) ) {
+			$account = isset( $payload['account'] ) ? (array) $payload['account'] : array();
+			if ( isset( $account['name'] ) && '' !== (string) $account['name'] ) {
+				$account_name = (string) $account['name'];
+			}
+		}
+
+		$classes = trim( 'dd-link dd-link-ext ' . $extra );
+
+		/* translators: %s is the connected Dash Dolphin account name. */
+		$title = $account_name !== ''
+			? sprintf( __( 'Opens in %s on app.dashdolphin.com', 'dash-dolphin' ), $account_name )
+			: __( 'Opens on app.dashdolphin.com', 'dash-dolphin' );
+
+		// Inline SVG external-link affordance. Stroke uses currentColor so it
+		// inherits the link color whether the link sits on a light card or in
+		// the hero.
+		$icon = '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" focusable="false" aria-hidden="true"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>';
+
+		printf(
+			'<a class="%1$s" href="%2$s" target="_blank" rel="noopener" data-dd-dashboard-link="1" data-dd-account-name="%3$s" title="%4$s">%5$s<span class="dd-link-ext-icon">%6$s</span><span class="screen-reader-text">%7$s</span></a>',
+			esc_attr( $classes ),
+			esc_url( $url ),
+			esc_attr( $account_name ),
+			esc_attr( $title ),
+			esc_html( $label ),
+			$icon,
+			esc_html__( '(opens in a new tab)', 'dash-dolphin' )
+		);
+	}
 
 	/**
 	 * Pull the account payload once per request (memoized).

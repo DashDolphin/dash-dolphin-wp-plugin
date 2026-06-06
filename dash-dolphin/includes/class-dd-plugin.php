@@ -255,10 +255,12 @@ class DD_Plugin {
 	}
 
 	/**
-	 * Return the URL to the plugin logo asset.
+	 * Return the URL to the bundled Dash Dolphin wordmark logo (white SVG).
+	 * This is the canonical brand asset shipped from dashdolphin.com and used
+	 * inside the hero header on every plugin page.
 	 */
 	public function get_logo_url(): string {
-		return DD_PLUGIN_URL . 'assets/images/dash-dolphin-logo.png';
+		return DD_PLUGIN_URL . 'assets/img/dash-dolphin-logo-wh.svg';
 	}
 
 	/**

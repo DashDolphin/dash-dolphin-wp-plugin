@@ -149,13 +149,27 @@
 	min-width: 0;
 }
 
+/*
+ * Hero wordmark (v0.3.0+).
+ *
+ * Replaces the previous uppercase "DASH DOLPHIN" text eyebrow with the
+ * official SVG wordmark from dashdolphin.com so the plugin header reads
+ * as a real brand surface, not a heading. We give the image a fixed
+ * display size to match the marketing site header (~180x30) and let the
+ * page title sit immediately below it. The SVG itself is
+ * white-on-transparent, so it sits cleanly on the dark hero gradient.
+ */
+.dd-hero-wordmark {
+	display: block;
+	height: 30px;
+	width: auto;
+	max-width: 220px;
+	margin-bottom: 8px;
+}
+
+/* Kept for backward compatibility if any older template still emits it. */
 .dd-hero-eyebrow {
-	text-transform: uppercase;
-	letter-spacing: 0.12em;
-	font-size: 11px;
-	font-weight: 600;
-	opacity: 0.85;
-	margin-bottom: 4px;
+	display: none;
 }
 
 .dd-hero-title {
@@ -388,12 +402,98 @@
 }
 
 .dd-table td {
-	vertical-align: top;
+	vertical-align: middle;
 }
 
 .dd-col-actions {
 	white-space: nowrap;
 	text-align: right;
+}
+
+.dd-col-alert {
+	white-space: nowrap;
+	width: 1%;
+}
+
+.dd-cell-summary {
+	min-width: 240px;
+}
+
+.dd-cell-code {
+	min-width: 280px;
+}
+
+/*
+ * WP 7.x core list-table look.
+ *
+ * The default `widefat striped` styling we inherit from WP core already
+ * gives us the right structure; we only normalize a few things so our
+ * tables read as native admin list-tables rather than custom branded
+ * widgets. Specifically:
+ *  - cell padding matches core's 14px row height
+ *  - body cells render in core's #1d2327 text on a 13px scale
+ *  - borders match core's #dcdcde
+ *  - row hover gets the subtle violet tint we use elsewhere
+ */
+.dd-table--wp7 {
+	border: 1px solid #dcdcde;
+	border-radius: 6px;
+	box-shadow: 0 1px 0 rgba(0, 0, 0, 0.02);
+	background: #fff;
+	font-size: 13px;
+}
+.dd-table--wp7 th,
+.dd-table--wp7 td {
+	padding: 12px 14px;
+	border-bottom: 1px solid #dcdcde;
+	vertical-align: middle;
+	color: #1d2327;
+	line-height: 1.5;
+}
+.dd-table--wp7 thead th {
+	font-weight: 600;
+	font-size: 13px;
+	color: #1d2327;
+	background: #f6f7f7;
+	border-bottom: 1px solid #c3c4c7;
+}
+.dd-table--wp7 tbody tr:last-child td {
+	border-bottom: 0;
+}
+.dd-table--wp7 tbody tr:hover {
+	background: rgba(124, 58, 237, 0.04);
+}
+.dd-table--wp7 td.dd-cell-summary {
+	font-weight: 400;
+	color: #1d2327;
+}
+
+/*
+ * Outbound dashboard link affordance.
+ *
+ * Used by render_dashboard_link() in PHP. The visible label is followed
+ * by a small inline SVG that signals "this link opens elsewhere". We
+ * keep the icon a nudged baseline-aligned to the text and inherit color
+ * so the affordance works on light cards and on the dark hero.
+ */
+.dd-link-ext {
+	display: inline-flex;
+	align-items: center;
+	gap: 4px;
+}
+.dd-link-ext-icon {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	opacity: 0.7;
+	transition: opacity 120ms ease;
+}
+.dd-link-ext:hover .dd-link-ext-icon,
+.dd-link-ext:focus .dd-link-ext-icon {
+	opacity: 1;
+}
+.dd-link-ext-icon svg {
+	display: block;
 }
 
 .dd-code {
@@ -420,6 +520,10 @@
 	color: var(--dd-muted-fg);
 	letter-spacing: 0.01em;
 	margin-right: 4px;
+	/* Prevent labels like "SMS sent" from wrapping onto two lines in narrow
+	 * Alert columns; the badge should always read on a single line. */
+	white-space: nowrap;
+	line-height: 1.6;
 }
 
 .dd-badge--success {
@@ -629,5 +733,212 @@
 
 .dd-aside-card-list a:hover {
 	color: var(--dd-link-hover);
+	text-decoration: underline;
+}
+
+/* ---------------------------------------------------------------------------
+ * Speed value-prop hero (Dashboard page)
+ *
+ * Sits above the recent inquiries table and leads with WHY speed matters,
+ * not WHAT the plugin does. Stats are sourced from dashdolphin.com's
+ * "Cost of Being Second" section. The card uses a soft brand gradient
+ * border, a white interior, and three column stats that collapse to a
+ * single column on narrow viewports.
+ * ------------------------------------------------------------------------- */
+
+.dd-speed {
+	margin-bottom: 18px;
+}
+
+.dd-speed-card {
+	position: relative;
+	background: #fff;
+	border-radius: var(--dd-radius);
+	padding: 24px 28px;
+	box-shadow: var(--dd-shadow);
+	border: 1px solid #e3e0f0;
+	overflow: hidden;
+}
+
+.dd-speed-card::before {
+	content: "";
+	position: absolute;
+	inset: 0 0 auto 0;
+	height: 4px;
+	background: var(--dd-brand-gradient);
+}
+
+.dd-speed-eyebrow {
+	text-transform: uppercase;
+	letter-spacing: 0.12em;
+	font-size: 11px;
+	font-weight: 600;
+	color: var(--dd-brand-violet);
+	margin-bottom: 6px;
+}
+
+.dd-speed-title {
+	font-size: 20px;
+	font-weight: 700;
+	color: #14082A;
+	margin: 0 0 6px;
+	line-height: 1.25;
+}
+
+.dd-speed-lede {
+	font-size: 14px;
+	color: var(--dd-text-muted);
+	margin: 0 0 18px;
+	max-width: 720px;
+	line-height: 1.5;
+}
+
+.dd-speed-stats {
+	display: grid;
+	grid-template-columns: repeat(3, 1fr);
+	gap: 20px;
+	padding: 14px 0;
+	border-top: 1px solid #ede8f7;
+	border-bottom: 1px solid #ede8f7;
+}
+
+@media (max-width: 720px) {
+	.dd-speed-stats {
+		grid-template-columns: 1fr;
+		gap: 14px;
+	}
+}
+
+.dd-speed-stat {
+	min-width: 0;
+}
+
+.dd-speed-stat-num {
+	font-size: 30px;
+	font-weight: 700;
+	color: var(--dd-brand-violet);
+	line-height: 1.1;
+	letter-spacing: -0.01em;
+}
+
+.dd-speed-stat-label {
+	font-size: 13px;
+	color: var(--dd-text);
+	margin-top: 4px;
+	line-height: 1.4;
+}
+
+.dd-speed-stat-src {
+	font-size: 11px;
+	color: var(--dd-text-muted);
+	margin-top: 4px;
+	text-transform: uppercase;
+	letter-spacing: 0.06em;
+}
+
+.dd-speed-proof {
+	margin-top: 14px;
+}
+
+.dd-speed-quote {
+	margin: 0;
+	font-size: 14px;
+	font-style: italic;
+	color: #14082A;
+	line-height: 1.5;
+	border-left: 3px solid var(--dd-brand-purple);
+	padding-left: 12px;
+}
+
+.dd-speed-cite {
+	display: block;
+	margin-top: 6px;
+	padding-left: 15px;
+	font-size: 12px;
+	font-style: normal;
+	color: var(--dd-text-muted);
+}
+
+/* ---------------------------------------------------------------------------
+ * Outbound-link preflight modal
+ *
+ * Opens when a user clicks an outbound dashboard link. Shows the account
+ * name the link will open in, so the user can confirm before leaving the
+ * admin context. We render this from JS (assets/js/admin.js); the styles
+ * here are deliberately conservative so they look at home on top of the
+ * WP admin chrome and don't fight the WP color palette.
+ * ------------------------------------------------------------------------- */
+
+.dd-modal-overlay {
+	position: fixed;
+	inset: 0;
+	background: rgba(20, 8, 42, 0.55);
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	z-index: 100000;
+	padding: 20px;
+	animation: dd-fade-in 120ms ease-out;
+}
+
+@keyframes dd-fade-in {
+	from { opacity: 0; }
+	to   { opacity: 1; }
+}
+
+.dd-modal {
+	background: #fff;
+	border-radius: 10px;
+	box-shadow: 0 20px 60px rgba(20, 8, 42, 0.4);
+	max-width: 460px;
+	width: 100%;
+	padding: 24px;
+	font-size: 14px;
+	color: var(--dd-text);
+	line-height: 1.5;
+}
+
+.dd-modal-title {
+	font-size: 17px;
+	font-weight: 700;
+	margin: 0 0 8px;
+	color: #14082A;
+}
+
+.dd-modal-body {
+	margin: 0 0 18px;
+	color: var(--dd-text);
+}
+
+.dd-modal-account {
+	font-weight: 600;
+	color: var(--dd-brand-violet);
+}
+
+.dd-modal-actions {
+	display: flex;
+	justify-content: flex-end;
+	gap: 8px;
+}
+
+.dd-modal-actions .button-primary {
+	background: var(--dd-brand-violet);
+	border-color: var(--dd-brand-violet);
+}
+
+.dd-modal-actions .button-primary:hover,
+.dd-modal-actions .button-primary:focus {
+	background: var(--dd-link-hover);
+	border-color: var(--dd-link-hover);
+}
+
+/* When a dashboard link sits inside a help paragraph or in the hero, we
+ * give it a touch more contrast so the external-link icon is readable. */
+.dd-hero .dd-link-ext {
+	color: #fff;
+}
+.dd-hero .dd-link-ext:hover,
+.dd-hero .dd-link-ext:focus {
+	color: rgba(255, 255, 255, 0.9);
 	text-decoration: underline;
 }
