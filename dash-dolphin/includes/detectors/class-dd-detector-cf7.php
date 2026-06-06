@@ -37,7 +37,7 @@ class DD_Detector_CF7 extends DD_Form_Detector {
 	 * {@inheritdoc}
 	 */
 	public function get_slug(): string {
-		return 'contact-form-7';
+		return 'cf7';
 	}
 
 	/**
