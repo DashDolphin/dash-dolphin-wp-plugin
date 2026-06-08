@@ -83,13 +83,12 @@
 
 .dd-hero {
 	position: relative;
-	/* Layered: dolphin logo watermark on the right + the brand gradient. The
-	   watermark sits at low opacity and is masked to fade into the gradient.
-	   The logo URL is injected via the --dd-hero-logo custom property by the
-	   PHP renderer so the plugin can ship the asset from any URL. */
+	/* Brand-gradient hero. We previously layered the wordmark SVG as a
+	   right-side background watermark, but with a text-based wordmark that
+	   read as a duplicate logo. The foreground .dd-hero-wordmark element is
+	   the single source of brand mark inside the hero. */
 	background:
 		linear-gradient(135deg, rgba(20, 8, 42, 0.92) 0%, rgba(67, 56, 202, 0.88) 55%, rgba(124, 58, 237, 0.92) 100%),
-		var(--dd-hero-logo, none) no-repeat right -60px center / 360px 360px,
 		var(--dd-brand-gradient);
 	color: #fff;
 	border-radius: var(--dd-radius);
@@ -101,23 +100,6 @@
 	gap: 24px;
 	flex-wrap: wrap;
 	overflow: hidden;
-}
-
-.dd-hero::before {
-	/* The actual dolphin watermark, layered on top of the gradient at low
-	   opacity so it reads as a brand mark, not a foreground image. */
-	content: "";
-	position: absolute;
-	inset: -10% -8% -10% auto;
-	width: 420px;
-	background-image: var(--dd-hero-logo, none);
-	background-repeat: no-repeat;
-	background-position: center right;
-	background-size: contain;
-	opacity: 0.18;
-	pointer-events: none;
-	mask-image: linear-gradient(to left, #000 30%, transparent 95%);
-	-webkit-mask-image: linear-gradient(to left, #000 30%, transparent 95%);
 }
 
 .dd-hero::after {
@@ -150,25 +132,33 @@
 }
 
 /*
- * Hero wordmark (v0.3.0+).
+ * Hero brand mark (v0.3.1+).
  *
- * Replaces the previous uppercase "DASH DOLPHIN" text eyebrow with the
- * official SVG wordmark from dashdolphin.com so the plugin header reads
- * as a real brand surface, not a heading. We give the image a fixed
- * display size to match the marketing site header (~180x30) and let the
- * page title sit immediately below it. The SVG itself is
- * white-on-transparent, so it sits cleanly on the dark hero gradient.
+ * The previous .dd-hero-wordmark image embedded the full "Dash Dolphin"
+ * wordmark, which read as a duplicate when combined with the page title
+ * and any background watermark. The hero now leads with the dolphin-only
+ * glyph and a small uppercase "Dash Dolphin" eyebrow above the page
+ * title, mirroring the marketing site's compact lockup.
  */
-.dd-hero-wordmark {
+.dd-hero-mark {
 	display: block;
-	height: 30px;
-	width: auto;
-	max-width: 220px;
-	margin-bottom: 8px;
+	width: 48px;
+	height: 48px;
+	flex: 0 0 auto;
 }
 
-/* Kept for backward compatibility if any older template still emits it. */
 .dd-hero-eyebrow {
+	display: block;
+	margin: 0 0 4px;
+	font-size: 11px;
+	font-weight: 600;
+	letter-spacing: 0.12em;
+	text-transform: uppercase;
+	color: rgba(255, 255, 255, 0.78);
+}
+
+/* Kept for backward compatibility if an older template still emits it. */
+.dd-hero-wordmark {
 	display: none;
 }
 

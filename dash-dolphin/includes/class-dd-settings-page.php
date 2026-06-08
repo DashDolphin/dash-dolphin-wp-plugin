@@ -120,7 +120,7 @@ class DD_Settings_Page {
 		echo '<div class="dd-section-head">';
 		echo '<h2 class="dd-h2">' . esc_html__( 'Recent inquiries', 'dash-dolphin' ) . '</h2>';
 		$this->render_dashboard_link(
-			$this->plugin->get_dashboard_url() . '/inquiries',
+			$this->plugin->get_dashboard_url() . '/requests',
 			__( 'See all inquiries', 'dash-dolphin' )
 		);
 		echo '</div>';
@@ -464,18 +464,15 @@ class DD_Settings_Page {
 	 * gradient. A subtle dolphin watermark continues to sit at the far right.
 	 */
 	private function render_hero( string $title, string $subtitle ): void {
-		$logo_url = $this->plugin->get_logo_url();
-		printf(
-			'<header class="dd-hero" style="--dd-hero-logo: url(%s);">',
-			esc_url( $logo_url )
-		);
+		$icon_url = $this->plugin->get_icon_url();
+		echo '<header class="dd-hero">';
 		echo '<div class="dd-hero-brand">';
-		echo '<div class="dd-hero-titles">';
 		printf(
-			'<img class="dd-hero-wordmark" src="%s" alt="%s" width="180" height="30" />',
-			esc_url( $logo_url ),
-			esc_attr__( 'Dash Dolphin', 'dash-dolphin' )
+			'<img class="dd-hero-mark" src="%s" alt="" width="48" height="48" aria-hidden="true" />',
+			esc_url( $icon_url )
 		);
+		echo '<div class="dd-hero-titles">';
+		echo '<p class="dd-hero-eyebrow">' . esc_html__( 'Dash Dolphin', 'dash-dolphin' ) . '</p>';
 		echo '<h1 class="dd-hero-title">' . esc_html( $title ) . '</h1>';
 		if ( '' !== $subtitle ) {
 			echo '<p class="dd-hero-subtitle">' . esc_html( $subtitle ) . '</p>';
@@ -557,13 +554,13 @@ class DD_Settings_Page {
 		}
 		echo '<li>';
 		$this->render_dashboard_link(
-			$dashboard . '/inquiries',
+			$dashboard . '/requests',
 			__( 'See all inquiries at app.dashdolphin.com', 'dash-dolphin' )
 		);
 		echo '</li>';
 		echo '<li>';
 		$this->render_dashboard_link(
-			$dashboard . '/api-keys',
+			$dashboard,
 			__( 'Manage API keys at app.dashdolphin.com', 'dash-dolphin' )
 		);
 		echo '</li>';
@@ -652,7 +649,7 @@ class DD_Settings_Page {
 		echo '</div>';
 		$dashboard_link = sprintf(
 			'<a href="%s" target="_blank" rel="noopener">%s</a>',
-			esc_url( $this->plugin->get_dashboard_url() . '/api-keys' ),
+			esc_url( $this->plugin->get_dashboard_url() ),
 			esc_html__( 'Dash Dolphin dashboard', 'dash-dolphin' )
 		);
 		echo '<p class="dd-help">' . wp_kses(
@@ -681,7 +678,7 @@ class DD_Settings_Page {
 		echo '</div>';
 		echo '<p class="dd-help">';
 		$this->render_dashboard_link(
-			$dashboard_url . '/settings/billing',
+			$dashboard_url,
 			__( 'Manage billing at app.dashdolphin.com', 'dash-dolphin' )
 		);
 		echo '</p>';
@@ -709,15 +706,12 @@ class DD_Settings_Page {
 			return;
 		}
 
-		$dashboard = $this->plugin->get_dashboard_url();
-
 		echo '<table class="widefat striped dd-table dd-table--wp7">';
 		echo '<thead><tr>';
 		echo '<th>' . esc_html__( 'When', 'dash-dolphin' ) . '</th>';
 		echo '<th>' . esc_html__( 'Form', 'dash-dolphin' ) . '</th>';
 		echo '<th>' . esc_html__( 'Summary', 'dash-dolphin' ) . '</th>';
 		echo '<th class="dd-col-alert">' . esc_html__( 'Alert', 'dash-dolphin' ) . '</th>';
-		echo '<th class="dd-col-actions"></th>';
 		echo '</tr></thead><tbody>';
 		foreach ( $rows as $row ) {
 			$created           = isset( $row['created_at'] ) ? (string) $row['created_at'] : '';
@@ -726,7 +720,6 @@ class DD_Settings_Page {
 			$sms_sent          = ! empty( $row['sms_sent'] );
 			$sms_status        = isset( $row['sms_delivery_status'] ) ? (string) $row['sms_delivery_status'] : '';
 			$processing_status = isset( $row['processing_status'] ) ? (string) $row['processing_status'] : '';
-			$row_id            = isset( $row['id'] ) ? (string) $row['id'] : '';
 
 			echo '<tr>';
 			echo '<td>' . esc_html( $this->format_relative_time( $created ) ) . '</td>';
@@ -735,14 +728,6 @@ class DD_Settings_Page {
 			echo '<td class="dd-col-alert">' . wp_kses_post(
 				$this->render_alert_badge( $sms_sent, $sms_status, $processing_status, $summary )
 			) . '</td>';
-			echo '<td class="dd-col-actions">';
-			if ( $row_id !== '' ) {
-				$this->render_dashboard_link(
-					$dashboard . '/inquiries/' . rawurlencode( $row_id ),
-					__( 'View details', 'dash-dolphin' )
-				);
-			}
-			echo '</td>';
 			echo '</tr>';
 		}
 		echo '</tbody></table>';
