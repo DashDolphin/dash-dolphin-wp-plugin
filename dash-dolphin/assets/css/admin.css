@@ -602,7 +602,12 @@
 
 .dd-guide-embed iframe {
 	width: 100%;
-	min-height: 520px;
+	/* Lock the player to 16:9 so it scales proportionally as the WP admin
+	   shell stretches wide. Previously a flat 520px min-height meant wide
+	   layouts cropped the bottom of the video. min-height stays as a fallback
+	   for browsers without aspect-ratio support. */
+	aspect-ratio: 16 / 9;
+	min-height: 320px;
 	border: 0;
 	display: block;
 }
@@ -931,4 +936,24 @@
 .dd-hero .dd-link-ext:focus {
 	color: rgba(255, 255, 255, 0.9);
 	text-decoration: underline;
+}
+
+/*
+ * Inline platform link inside the connection table's "Connection Type" cell,
+ * and the auxiliary "Walkthrough" link in the actions cell. Both deep-link
+ * to the matching guide on the Integrations page.
+ */
+.dd-inline-link {
+	color: var(--dd-brand-purple, #6f3df8);
+	text-decoration: none;
+	font-weight: 500;
+}
+.dd-inline-link:hover,
+.dd-inline-link:focus {
+	text-decoration: underline;
+}
+.dd-walk-link {
+	margin-left: 8px;
+	font-size: 12px;
+	white-space: nowrap;
 }

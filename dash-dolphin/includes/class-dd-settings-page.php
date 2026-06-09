@@ -181,62 +181,15 @@ class DD_Settings_Page {
 	}
 
 	/**
-	 * Connections page: connection addresses + paste instructions.
-	 */
-	public function render_connections(): void {
-		if ( ! current_user_can( DD_Plugin::REQUIRED_CAP ) ) {
-			return;
-		}
-
-		$this->open_shell( DD_Plugin::PAGE_CONNECTIONS );
-
-		if ( ! $this->plugin->has_api_key() ) {
-			$this->render_no_key_notice();
-			$this->close_shell( DD_Plugin::PAGE_CONNECTIONS );
-			return;
-		}
-
-		$client    = $this->plugin->api_client();
-		$resp      = $client->get_forwarding_emails();
-		$dashboard = $this->plugin->get_dashboard_url();
-
-		echo '<section class="dd-section">';
-		echo '<h2 class="dd-h2">' . esc_html__( 'How connections work', 'dash-dolphin' ) . '</h2>';
-		echo '<div class="dd-card">';
-		echo '<ol class="dd-steps">';
-		echo '<li>' . esc_html__( 'Copy the connection address for the form you want to wire up.', 'dash-dolphin' ) . '</li>';
-		echo '<li>' . esc_html__( 'Open that form in your form plugin and edit its admin notification email.', 'dash-dolphin' ) . '</li>';
-		echo '<li>' . esc_html__( 'Paste the connection address into the BCC field, then save.', 'dash-dolphin' ) . '</li>';
-		echo '<li>' . esc_html__( 'Submit a test to confirm alerts arrive.', 'dash-dolphin' ) . '</li>';
-		echo '</ol>';
-		echo '<p class="dd-help">' . esc_html__( 'BCC keeps the address hidden from your customer and from your existing notification recipients.', 'dash-dolphin' ) . '</p>';
-		echo '</div>';
-		echo '</section>';
-
-		echo '<section class="dd-section">';
-		echo '<div class="dd-section-head">';
-		echo '<h2 class="dd-h2">' . esc_html__( 'Connections', 'dash-dolphin' ) . '</h2>';
-		$this->render_dashboard_link(
-			$dashboard . '/connections',
-			__( 'Manage connections in dashboard', 'dash-dolphin' )
-		);
-		echo '</div>';
-
-		if ( is_wp_error( $resp ) ) {
-			$this->render_error( $resp, __( 'We could not load your connections.', 'dash-dolphin' ) );
-		} else {
-			$connections = isset( $resp['forwarding_emails'] )
-				? (array) $resp['forwarding_emails']
-				: ( isset( $resp['connections'] ) ? (array) $resp['connections'] : array() );
-			$this->render_connections_table( $connections );
-		}
-		echo '</section>';
-
-		$this->close_shell( DD_Plugin::PAGE_CONNECTIONS );
-	}
-
-	/**
-	 * Setup page: Guidde walkthroughs, detected first, accordion + filter.
+	 * Setup page (formerly "Connections" pre-0.3.2).
+	 *
+	 * Lists each form's connection address and shows the paste-into-BCC
+	 * instructions. Renamed to match the web app's vocabulary: in app.
+	 * dashdolphin.com the equivalent screen is also called "Setup".
+	 *
+	 * Each row in the connections table now also links to the relevant
+	 * walkthrough on the Integrations page, so users with a detected form
+	 * platform can jump straight to a per-platform video without scrolling.
 	 */
 	public function render_setup(): void {
 		if ( ! current_user_can( DD_Plugin::REQUIRED_CAP ) ) {
@@ -251,11 +204,74 @@ class DD_Settings_Page {
 			return;
 		}
 
+		$client    = $this->plugin->api_client();
+		$resp      = $client->get_forwarding_emails();
+		$dashboard = $this->plugin->get_dashboard_url();
+
+		echo '<section class="dd-section">';
+		echo '<h2 class="dd-h2">' . esc_html__( 'How setup works', 'dash-dolphin' ) . '</h2>';
+		echo '<div class="dd-card">';
+		echo '<ol class="dd-steps">';
+		echo '<li>' . esc_html__( 'Copy the connection address for the form you want to wire up.', 'dash-dolphin' ) . '</li>';
+		echo '<li>' . esc_html__( 'Open that form in your form plugin and edit its admin notification email.', 'dash-dolphin' ) . '</li>';
+		echo '<li>' . esc_html__( 'Paste the connection address into the BCC field, then save.', 'dash-dolphin' ) . '</li>';
+		echo '<li>' . esc_html__( 'Submit a test to confirm alerts arrive.', 'dash-dolphin' ) . '</li>';
+		echo '</ol>';
+		printf(
+			'<p class="dd-help">%s %s</p>',
+			esc_html__( 'BCC keeps the address hidden from your customer and from your existing notification recipients.', 'dash-dolphin' ),
+			sprintf(
+				/* translators: %s is a link to the Integrations page. */
+				wp_kses( __( 'Need a step-by-step walkthrough? See the %s page.', 'dash-dolphin' ), array( 'a' => array( 'href' => array() ) ) ),
+				'<a href="' . esc_url( $this->plugin->get_page_url( DD_Plugin::PAGE_INTEGRATIONS ) ) . '">' . esc_html__( 'Integrations', 'dash-dolphin' ) . '</a>'
+			)
+		);
+		echo '</div>';
+		echo '</section>';
+
+		echo '<section class="dd-section">';
+		echo '<div class="dd-section-head">';
+		echo '<h2 class="dd-h2">' . esc_html__( 'Connection addresses', 'dash-dolphin' ) . '</h2>';
+		$this->render_dashboard_link(
+			$dashboard . '/dashboard',
+			__( 'Manage connections in dashboard', 'dash-dolphin' )
+		);
+		echo '</div>';
+
+		if ( is_wp_error( $resp ) ) {
+			$this->render_error( $resp, __( 'We could not load your connections.', 'dash-dolphin' ) );
+		} else {
+			$connections = isset( $resp['forwarding_emails'] )
+				? (array) $resp['forwarding_emails']
+				: ( isset( $resp['connections'] ) ? (array) $resp['connections'] : array() );
+			$this->render_connections_table( $connections );
+		}
+		echo '</section>';
+
+		$this->close_shell( DD_Plugin::PAGE_SETUP );
+	}
+
+	/**
+	 * Setup page: Guidde walkthroughs, detected first, accordion + filter.
+	 */
+	public function render_integrations(): void {
+		if ( ! current_user_can( DD_Plugin::REQUIRED_CAP ) ) {
+			return;
+		}
+
+		$this->open_shell( DD_Plugin::PAGE_INTEGRATIONS );
+
+		if ( ! $this->plugin->has_api_key() ) {
+			$this->render_no_key_notice();
+			$this->close_shell( DD_Plugin::PAGE_INTEGRATIONS );
+			return;
+		}
+
 		$client = $this->plugin->api_client();
 		$resp   = $client->get_integration_guides();
 
 		echo '<section class="dd-section">';
-		echo '<h2 class="dd-h2">' . esc_html__( 'Setup walkthroughs', 'dash-dolphin' ) . '</h2>';
+		echo '<h2 class="dd-h2">' . esc_html__( 'Integration walkthroughs', 'dash-dolphin' ) . '</h2>';
 		echo '<p class="dd-subhead">' .
 			esc_html__( 'Detected platforms are expanded first. Use the dropdown to see any other one.', 'dash-dolphin' ) .
 			'</p>';
@@ -263,7 +279,7 @@ class DD_Settings_Page {
 
 		if ( is_wp_error( $resp ) ) {
 			$this->render_error( $resp, __( 'We could not load setup guides.', 'dash-dolphin' ) );
-			$this->close_shell( DD_Plugin::PAGE_SETUP );
+			$this->close_shell( DD_Plugin::PAGE_INTEGRATIONS );
 			return;
 		}
 
@@ -291,7 +307,7 @@ class DD_Settings_Page {
 
 		// Filter dropdown.
 		echo '<form method="get" class="dd-filter">';
-		echo '<input type="hidden" name="page" value="' . esc_attr( DD_Plugin::PAGE_SETUP ) . '" />';
+		echo '<input type="hidden" name="page" value="' . esc_attr( DD_Plugin::PAGE_INTEGRATIONS ) . '" />';
 		echo '<label for="dd-guide-filter" class="dd-label dd-label--inline">' .
 			esc_html__( 'Show guide for', 'dash-dolphin' ) .
 			'</label>';
@@ -323,7 +339,7 @@ class DD_Settings_Page {
 			echo '<div class="dd-card dd-card--muted"><p>' .
 				esc_html__( 'No guides match that filter.', 'dash-dolphin' ) .
 				'</p></div>';
-			$this->close_shell( DD_Plugin::PAGE_SETUP );
+			$this->close_shell( DD_Plugin::PAGE_INTEGRATIONS );
 			return;
 		}
 
@@ -384,7 +400,7 @@ class DD_Settings_Page {
 			echo '</details>';
 		}
 
-		$this->close_shell( DD_Plugin::PAGE_SETUP );
+		$this->close_shell( DD_Plugin::PAGE_INTEGRATIONS );
 	}
 
 	/**
@@ -538,18 +554,18 @@ class DD_Settings_Page {
 		echo '<div class="dd-aside-card">';
 		echo '<h3 class="dd-aside-card-title">' . esc_html__( 'Quick links', 'dash-dolphin' ) . '</h3>';
 		echo '<ul class="dd-aside-card-list">';
-		if ( DD_Plugin::PAGE_CONNECTIONS !== $current_page ) {
-			printf(
-				'<li><a href="%s">%s</a></li>',
-				esc_url( $this->plugin->get_page_url( DD_Plugin::PAGE_CONNECTIONS ) ),
-				esc_html__( 'Wire up a new form', 'dash-dolphin' )
-			);
-		}
 		if ( DD_Plugin::PAGE_SETUP !== $current_page ) {
 			printf(
 				'<li><a href="%s">%s</a></li>',
 				esc_url( $this->plugin->get_page_url( DD_Plugin::PAGE_SETUP ) ),
-				esc_html__( 'Walkthroughs by platform', 'dash-dolphin' )
+				esc_html__( 'Wire up a new form', 'dash-dolphin' )
+			);
+		}
+		if ( DD_Plugin::PAGE_INTEGRATIONS !== $current_page ) {
+			printf(
+				'<li><a href="%s">%s</a></li>',
+				esc_url( $this->plugin->get_page_url( DD_Plugin::PAGE_INTEGRATIONS ) ),
+				esc_html__( 'Integration walkthroughs', 'dash-dolphin' )
 			);
 		}
 		echo '<li>';
@@ -584,10 +600,10 @@ class DD_Settings_Page {
 	 */
 	private function page_title( string $page_slug ): string {
 		switch ( $page_slug ) {
-			case DD_Plugin::PAGE_CONNECTIONS:
-				return __( 'Connections', 'dash-dolphin' );
 			case DD_Plugin::PAGE_SETUP:
 				return __( 'Setup', 'dash-dolphin' );
+			case DD_Plugin::PAGE_INTEGRATIONS:
+				return __( 'Integrations', 'dash-dolphin' );
 			case DD_Plugin::PAGE_LICENSE:
 				return __( 'License', 'dash-dolphin' );
 			case DD_Plugin::PAGE_DASHBOARD:
@@ -601,10 +617,10 @@ class DD_Settings_Page {
 	 */
 	private function page_subtitle( string $page_slug ): string {
 		switch ( $page_slug ) {
-			case DD_Plugin::PAGE_CONNECTIONS:
-				return __( 'Drop a connection address into the BCC field of any form notification.', 'dash-dolphin' );
 			case DD_Plugin::PAGE_SETUP:
-				return __( 'Step-by-step walkthroughs for every supported platform.', 'dash-dolphin' );
+				return __( 'Drop a connection address into the BCC field of any form notification.', 'dash-dolphin' );
+			case DD_Plugin::PAGE_INTEGRATIONS:
+				return __( 'Step-by-step walkthroughs for every supported form platform.', 'dash-dolphin' );
 			case DD_Plugin::PAGE_LICENSE:
 				return __( 'Manage the Dash Dolphin API key this site uses.', 'dash-dolphin' );
 			case DD_Plugin::PAGE_DASHBOARD:
@@ -791,6 +807,8 @@ class DD_Settings_Page {
 			return;
 		}
 
+		$integrations_url = $this->plugin->get_page_url( DD_Plugin::PAGE_INTEGRATIONS );
+
 		echo '<table class="widefat striped dd-table dd-table--wp7">';
 		echo '<thead><tr>';
 		echo '<th>' . esc_html__( 'Connection', 'dash-dolphin' ) . '</th>';
@@ -803,9 +821,27 @@ class DD_Settings_Page {
 			$form_type = isset( $conn['form_type'] ) ? (string) $conn['form_type'] : '';
 			$address   = isset( $conn['email_address'] ) ? (string) $conn['email_address'] : '';
 
+			// Deep-link to the Integrations page filtered to this platform's
+			// walkthrough. The Integrations filter accepts the same slug key
+			// (e.g. "elementor", "gravity-forms") that we store in form_type.
+			$type_label = $form_type !== '' ? $this->humanize_form_type( $form_type ) : '';
+			$walk_url   = $form_type !== ''
+				? add_query_arg( 'guide', $form_type, $integrations_url )
+				: '';
+
 			echo '<tr>';
 			echo '<td>' . esc_html( $name ) . '</td>';
-			echo '<td>' . esc_html( $form_type !== '' ? $this->humanize_form_type( $form_type ) : '—' ) . '</td>';
+			echo '<td>';
+			if ( '' !== $walk_url ) {
+				printf(
+					'<a href="%s" class="dd-inline-link">%s</a>',
+					esc_url( $walk_url ),
+					esc_html( $type_label )
+				);
+			} else {
+				echo esc_html( '—' );
+			}
+			echo '</td>';
 			echo '<td class="dd-cell-code"><code class="dd-code">' . esc_html( $address ) . '</code></td>';
 			echo '<td class="dd-col-actions">';
 			if ( $address !== '' ) {
@@ -813,6 +849,13 @@ class DD_Settings_Page {
 					'<button type="button" class="button dd-copy" data-dd-copy="%s">%s</button>',
 					esc_attr( $address ),
 					esc_html__( 'Copy', 'dash-dolphin' )
+				);
+			}
+			if ( '' !== $walk_url ) {
+				printf(
+					' <a class="button-link dd-walk-link" href="%s">%s</a>',
+					esc_url( $walk_url ),
+					esc_html__( 'Walkthrough', 'dash-dolphin' )
 				);
 			}
 			echo '</td>';

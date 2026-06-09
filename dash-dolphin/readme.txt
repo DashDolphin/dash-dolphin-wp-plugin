@@ -58,7 +58,7 @@ A Dash Dolphin account is required. Sign up at https://dashdolphin.com.
 2. Activate the plugin through the Plugins menu in your WordPress admin.
 3. In your WordPress admin sidebar, click Dash Dolphin > License.
 4. Paste your Dash Dolphin API key. You can create one at https://app.dashdolphin.com/api-keys.
-5. Visit Dash Dolphin > Connections, copy a connection address, and paste it into the BCC field of any form's admin notification email. Save the form.
+5. Visit Dash Dolphin > Setup, copy a connection address, and paste it into the BCC field of any form's admin notification email. Save the form.
 6. Submit a test entry. You should receive an SMS within seconds.
 
 == Frequently Asked Questions ==
@@ -102,11 +102,21 @@ That happens when your dashboard browser session is signed into a different Dash
 == Screenshots ==
 
 1. The Dash Dolphin Dashboard tab in WordPress: recent inquiries, smart summaries, and SMS delivery status at a glance.
-2. The Connections tab: paste a single BCC address into any form to wire it up.
+2. The Setup tab: paste a single BCC address into any form to wire it up.
 3. The Setup tab: step-by-step walkthroughs for each supported form plugin, with the platforms you actually use auto-detected and surfaced first.
 4. A sample SMS alert: lead name, intent, and contact info, delivered in seconds.
 
 == Changelog ==
+
+= 0.3.2 =
+* New: Renamed menu items for clarity. The wiring page is now "Setup" (where you grab connection addresses for your forms) and the walkthrough page is now "Integrations" (step-by-step videos for each form plugin).
+* New: Per-row Walkthrough links on the Setup table jump straight to the matching Integrations walkthrough for that form plugin.
+* New: Setup page cross-links to Integrations from the intro copy when a step-by-step is helpful.
+* New: Color Dash Dolphin menu icon in the WordPress admin sidebar.
+* Improved: Walkthrough video player now uses a 16:9 aspect ratio so it scales correctly on wide screens instead of stretching.
+* Improved: Hero header on every plugin page now leads with the Dash Dolphin brand mark and eyebrow.
+* Fixed: Outbound links from Recent inquiries, Connection addresses, and the empty-state CTA now route to live dashboard routes instead of 404 pages.
+* Compatibility: Old "dash-dolphin-connections" admin URL automatically 301-redirects to "dash-dolphin-setup" so bookmarks keep working.
 
 = 0.3.0 =
 * New: Speed-of-response value-prop panel on the Dashboard tab with proof points from dashdolphin.com.
@@ -132,6 +142,9 @@ That happens when your dashboard browser session is signed into a different Dash
 * Initial development scaffold.
 
 == Upgrade Notice ==
+
+= 0.3.2 =
+Clearer menu labels (Setup for connection addresses, Integrations for walkthroughs), per-row walkthrough links, color sidebar icon, fixed video aspect ratio, and corrected outbound dashboard links. Safe upgrade. Old bookmarks redirect automatically.
 
 = 0.3.0 =
 Faster setup, cleaner UI, and clearer messaging about which Dash Dolphin account each inquiry belongs to. Safe upgrade.
