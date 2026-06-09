@@ -308,12 +308,12 @@ class DD_Plugin {
 	}
 
 	/**
-	 * Return the URL to the dolphin-only brand icon (white SVG). Used as a
-	 * compact mark inside the hero header alongside the page title, and any
+	 * Return the URL to the dolphin-only brand icon (full-color SVG). Used as
+	 * a compact mark inside the hero header alongside the page title, and any
 	 * other surface that needs the dolphin glyph without the wordmark text.
 	 */
 	public function get_icon_url(): string {
-		return DD_PLUGIN_URL . 'assets/img/dash-dolphin-icon-wh.svg';
+		return DD_PLUGIN_URL . 'assets/img/dash-dolphin-icon.svg';
 	}
 
 	/**
