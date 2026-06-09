@@ -120,7 +120,7 @@ class DD_Settings_Page {
 		echo '<div class="dd-section-head">';
 		echo '<h2 class="dd-h2">' . esc_html__( 'Recent inquiries', 'dash-dolphin' ) . '</h2>';
 		$this->render_dashboard_link(
-			$this->plugin->get_dashboard_url() . '/inquiries',
+			$this->plugin->get_dashboard_url() . '/requests',
 			__( 'See all inquiries', 'dash-dolphin' )
 		);
 		echo '</div>';
@@ -181,18 +181,26 @@ class DD_Settings_Page {
 	}
 
 	/**
-	 * Connections page: connection addresses + paste instructions.
+	 * Setup page (formerly "Connections" pre-0.3.2).
+	 *
+	 * Lists each form's connection address and shows the paste-into-BCC
+	 * instructions. Renamed to match the web app's vocabulary: in app.
+	 * dashdolphin.com the equivalent screen is also called "Setup".
+	 *
+	 * Each row in the connections table now also links to the relevant
+	 * walkthrough on the Integrations page, so users with a detected form
+	 * platform can jump straight to a per-platform video without scrolling.
 	 */
-	public function render_connections(): void {
+	public function render_setup(): void {
 		if ( ! current_user_can( DD_Plugin::REQUIRED_CAP ) ) {
 			return;
 		}
 
-		$this->open_shell( DD_Plugin::PAGE_CONNECTIONS );
+		$this->open_shell( DD_Plugin::PAGE_SETUP );
 
 		if ( ! $this->plugin->has_api_key() ) {
-			$this->render_no_key_notice();
-			$this->close_shell( DD_Plugin::PAGE_CONNECTIONS );
+			$this->render_no_key_notice_compact();
+			$this->close_shell( DD_Plugin::PAGE_SETUP );
 			return;
 		}
 
@@ -200,8 +208,11 @@ class DD_Settings_Page {
 		$resp      = $client->get_forwarding_emails();
 		$dashboard = $this->plugin->get_dashboard_url();
 
+		$integrations_url       = $this->plugin->get_page_url( DD_Plugin::PAGE_INTEGRATIONS );
+		$detected_platforms     = $this->get_detected_platforms();
+
 		echo '<section class="dd-section">';
-		echo '<h2 class="dd-h2">' . esc_html__( 'How connections work', 'dash-dolphin' ) . '</h2>';
+		echo '<h2 class="dd-h2">' . esc_html__( 'How setup works', 'dash-dolphin' ) . '</h2>';
 		echo '<div class="dd-card">';
 		echo '<ol class="dd-steps">';
 		echo '<li>' . esc_html__( 'Copy the connection address for the form you want to wire up.', 'dash-dolphin' ) . '</li>';
@@ -210,14 +221,43 @@ class DD_Settings_Page {
 		echo '<li>' . esc_html__( 'Submit a test to confirm alerts arrive.', 'dash-dolphin' ) . '</li>';
 		echo '</ol>';
 		echo '<p class="dd-help">' . esc_html__( 'BCC keeps the address hidden from your customer and from your existing notification recipients.', 'dash-dolphin' ) . '</p>';
+
+		// Detected form plugins, rendered as pills inside the same card. Each
+		// pill deep-links to the Integrations page filtered to that plugin's
+		// walkthrough. We surface this row only when at least one supported
+		// form plugin is active on the site; otherwise the generic
+		// "see the Integrations page" line below carries the load.
+		if ( ! empty( $detected_platforms ) ) {
+			echo '<div class="dd-pill-row">';
+			echo '<span class="dd-pill-row-label">' . esc_html__( 'Detected form plugins:', 'dash-dolphin' ) . '</span>';
+			foreach ( $detected_platforms as $platform ) {
+				printf(
+					'<a class="dd-pill" href="%s">%s</a>',
+					esc_url( add_query_arg( 'guide', $platform['slug'], $integrations_url ) ),
+					esc_html( $platform['label'] )
+				);
+			}
+			echo '</div>';
+		}
+
+		// Walkthrough line, always on its own line below the BCC sentence and
+		// (when present) below the detected-platform pills.
+		printf(
+			'<p class="dd-help dd-help--block">%s</p>',
+			sprintf(
+				/* translators: %s is a link to the Integrations page. */
+				wp_kses( __( 'Need a step-by-step walkthrough? See the %s page.', 'dash-dolphin' ), array( 'a' => array( 'href' => array() ) ) ),
+				'<a href="' . esc_url( $integrations_url ) . '">' . esc_html__( 'Integrations', 'dash-dolphin' ) . '</a>'
+			)
+		);
 		echo '</div>';
 		echo '</section>';
 
 		echo '<section class="dd-section">';
 		echo '<div class="dd-section-head">';
-		echo '<h2 class="dd-h2">' . esc_html__( 'Connections', 'dash-dolphin' ) . '</h2>';
+		echo '<h2 class="dd-h2">' . esc_html__( 'Connection addresses', 'dash-dolphin' ) . '</h2>';
 		$this->render_dashboard_link(
-			$dashboard . '/connections',
+			$dashboard . '/dashboard',
 			__( 'Manage connections in dashboard', 'dash-dolphin' )
 		);
 		echo '</div>';
@@ -232,22 +272,22 @@ class DD_Settings_Page {
 		}
 		echo '</section>';
 
-		$this->close_shell( DD_Plugin::PAGE_CONNECTIONS );
+		$this->close_shell( DD_Plugin::PAGE_SETUP );
 	}
 
 	/**
 	 * Setup page: Guidde walkthroughs, detected first, accordion + filter.
 	 */
-	public function render_setup(): void {
+	public function render_integrations(): void {
 		if ( ! current_user_can( DD_Plugin::REQUIRED_CAP ) ) {
 			return;
 		}
 
-		$this->open_shell( DD_Plugin::PAGE_SETUP );
+		$this->open_shell( DD_Plugin::PAGE_INTEGRATIONS );
 
 		if ( ! $this->plugin->has_api_key() ) {
-			$this->render_no_key_notice();
-			$this->close_shell( DD_Plugin::PAGE_SETUP );
+			$this->render_no_key_notice_compact();
+			$this->close_shell( DD_Plugin::PAGE_INTEGRATIONS );
 			return;
 		}
 
@@ -255,7 +295,7 @@ class DD_Settings_Page {
 		$resp   = $client->get_integration_guides();
 
 		echo '<section class="dd-section">';
-		echo '<h2 class="dd-h2">' . esc_html__( 'Setup walkthroughs', 'dash-dolphin' ) . '</h2>';
+		echo '<h2 class="dd-h2">' . esc_html__( 'Integration walkthroughs', 'dash-dolphin' ) . '</h2>';
 		echo '<p class="dd-subhead">' .
 			esc_html__( 'Detected platforms are expanded first. Use the dropdown to see any other one.', 'dash-dolphin' ) .
 			'</p>';
@@ -263,7 +303,7 @@ class DD_Settings_Page {
 
 		if ( is_wp_error( $resp ) ) {
 			$this->render_error( $resp, __( 'We could not load setup guides.', 'dash-dolphin' ) );
-			$this->close_shell( DD_Plugin::PAGE_SETUP );
+			$this->close_shell( DD_Plugin::PAGE_INTEGRATIONS );
 			return;
 		}
 
@@ -291,7 +331,7 @@ class DD_Settings_Page {
 
 		// Filter dropdown.
 		echo '<form method="get" class="dd-filter">';
-		echo '<input type="hidden" name="page" value="' . esc_attr( DD_Plugin::PAGE_SETUP ) . '" />';
+		echo '<input type="hidden" name="page" value="' . esc_attr( DD_Plugin::PAGE_INTEGRATIONS ) . '" />';
 		echo '<label for="dd-guide-filter" class="dd-label dd-label--inline">' .
 			esc_html__( 'Show guide for', 'dash-dolphin' ) .
 			'</label>';
@@ -323,7 +363,7 @@ class DD_Settings_Page {
 			echo '<div class="dd-card dd-card--muted"><p>' .
 				esc_html__( 'No guides match that filter.', 'dash-dolphin' ) .
 				'</p></div>';
-			$this->close_shell( DD_Plugin::PAGE_SETUP );
+			$this->close_shell( DD_Plugin::PAGE_INTEGRATIONS );
 			return;
 		}
 
@@ -384,7 +424,7 @@ class DD_Settings_Page {
 			echo '</details>';
 		}
 
-		$this->close_shell( DD_Plugin::PAGE_SETUP );
+		$this->close_shell( DD_Plugin::PAGE_INTEGRATIONS );
 	}
 
 	/**
@@ -402,6 +442,26 @@ class DD_Settings_Page {
 		echo '<section class="dd-section">';
 		echo '<h2 class="dd-h2">' . esc_html__( 'API key', 'dash-dolphin' ) . '</h2>';
 		$this->render_api_key_form( $api_key );
+
+		// Pointer to the user profile in the Dash Dolphin web app. Deep-links to
+		// the Dashboard with ?section=settings so the Settings tab opens directly.
+		$profile_url = $this->plugin->get_dashboard_url() . '/dashboard?section=settings';
+		echo '<div class="dd-card dd-card--muted dd-profile-callout">';
+		echo '<p class="dd-help">';
+		printf(
+			/* translators: %s is a link to the user profile page in the Dash Dolphin dashboard. */
+			wp_kses(
+				__( 'Need to update your name, email, phone number, or password? Visit the %s in the Dash Dolphin dashboard.', 'dash-dolphin' ),
+				array( 'a' => array( 'href' => array(), 'target' => array(), 'rel' => array() ) )
+			),
+			sprintf(
+				'<a href="%s" target="_blank" rel="noopener">%s</a>',
+				esc_url( $profile_url ),
+				esc_html__( 'user profile page', 'dash-dolphin' )
+			)
+		);
+		echo '</p>';
+		echo '</div>';
 		echo '</section>';
 
 		if ( $this->plugin->has_api_key() ) {
@@ -464,18 +524,15 @@ class DD_Settings_Page {
 	 * gradient. A subtle dolphin watermark continues to sit at the far right.
 	 */
 	private function render_hero( string $title, string $subtitle ): void {
-		$logo_url = $this->plugin->get_logo_url();
-		printf(
-			'<header class="dd-hero" style="--dd-hero-logo: url(%s);">',
-			esc_url( $logo_url )
-		);
+		$icon_url = $this->plugin->get_icon_url();
+		echo '<header class="dd-hero">';
 		echo '<div class="dd-hero-brand">';
-		echo '<div class="dd-hero-titles">';
 		printf(
-			'<img class="dd-hero-wordmark" src="%s" alt="%s" width="180" height="30" />',
-			esc_url( $logo_url ),
-			esc_attr__( 'Dash Dolphin', 'dash-dolphin' )
+			'<img class="dd-hero-mark" src="%s" alt="" width="48" height="48" aria-hidden="true" />',
+			esc_url( $icon_url )
 		);
+		echo '<div class="dd-hero-titles">';
+		echo '<p class="dd-hero-eyebrow">' . esc_html__( 'Dash Dolphin', 'dash-dolphin' ) . '</p>';
 		echo '<h1 class="dd-hero-title">' . esc_html( $title ) . '</h1>';
 		if ( '' !== $subtitle ) {
 			echo '<p class="dd-hero-subtitle">' . esc_html( $subtitle ) . '</p>';
@@ -541,29 +598,29 @@ class DD_Settings_Page {
 		echo '<div class="dd-aside-card">';
 		echo '<h3 class="dd-aside-card-title">' . esc_html__( 'Quick links', 'dash-dolphin' ) . '</h3>';
 		echo '<ul class="dd-aside-card-list">';
-		if ( DD_Plugin::PAGE_CONNECTIONS !== $current_page ) {
-			printf(
-				'<li><a href="%s">%s</a></li>',
-				esc_url( $this->plugin->get_page_url( DD_Plugin::PAGE_CONNECTIONS ) ),
-				esc_html__( 'Wire up a new form', 'dash-dolphin' )
-			);
-		}
 		if ( DD_Plugin::PAGE_SETUP !== $current_page ) {
 			printf(
 				'<li><a href="%s">%s</a></li>',
 				esc_url( $this->plugin->get_page_url( DD_Plugin::PAGE_SETUP ) ),
-				esc_html__( 'Walkthroughs by platform', 'dash-dolphin' )
+				esc_html__( 'Wire up a new form', 'dash-dolphin' )
+			);
+		}
+		if ( DD_Plugin::PAGE_INTEGRATIONS !== $current_page ) {
+			printf(
+				'<li><a href="%s">%s</a></li>',
+				esc_url( $this->plugin->get_page_url( DD_Plugin::PAGE_INTEGRATIONS ) ),
+				esc_html__( 'Integration walkthroughs', 'dash-dolphin' )
 			);
 		}
 		echo '<li>';
 		$this->render_dashboard_link(
-			$dashboard . '/inquiries',
+			$dashboard . '/requests',
 			__( 'See all inquiries at app.dashdolphin.com', 'dash-dolphin' )
 		);
 		echo '</li>';
 		echo '<li>';
 		$this->render_dashboard_link(
-			$dashboard . '/api-keys',
+			$dashboard,
 			__( 'Manage API keys at app.dashdolphin.com', 'dash-dolphin' )
 		);
 		echo '</li>';
@@ -587,10 +644,10 @@ class DD_Settings_Page {
 	 */
 	private function page_title( string $page_slug ): string {
 		switch ( $page_slug ) {
-			case DD_Plugin::PAGE_CONNECTIONS:
-				return __( 'Connections', 'dash-dolphin' );
 			case DD_Plugin::PAGE_SETUP:
 				return __( 'Setup', 'dash-dolphin' );
+			case DD_Plugin::PAGE_INTEGRATIONS:
+				return __( 'Integrations', 'dash-dolphin' );
 			case DD_Plugin::PAGE_LICENSE:
 				return __( 'License', 'dash-dolphin' );
 			case DD_Plugin::PAGE_DASHBOARD:
@@ -604,10 +661,10 @@ class DD_Settings_Page {
 	 */
 	private function page_subtitle( string $page_slug ): string {
 		switch ( $page_slug ) {
-			case DD_Plugin::PAGE_CONNECTIONS:
-				return __( 'Drop a connection address into the BCC field of any form notification.', 'dash-dolphin' );
 			case DD_Plugin::PAGE_SETUP:
-				return __( 'Step-by-step walkthroughs for every supported platform.', 'dash-dolphin' );
+				return __( 'Drop a connection address into the BCC field of any form notification.', 'dash-dolphin' );
+			case DD_Plugin::PAGE_INTEGRATIONS:
+				return __( 'Step-by-step walkthroughs for every supported form platform.', 'dash-dolphin' );
 			case DD_Plugin::PAGE_LICENSE:
 				return __( 'Manage the Dash Dolphin API key this site uses.', 'dash-dolphin' );
 			case DD_Plugin::PAGE_DASHBOARD:
@@ -617,10 +674,107 @@ class DD_Settings_Page {
 	}
 
 	/**
-	 * Notice that appears on Dashboard/Connections/Setup when no API key
-	 * is set yet, with a direct link to the License page.
+	 * Full-page sales pitch for Dashboard when no API key is set yet.
+	 *
+	 * Users land here straight from the WordPress plugin directory and may
+	 * have no context on what Dash Dolphin is. We give them: a clear value
+	 * lead-in, the speed-of-response stats, a customer outcome quote, and
+	 * dual CTAs (start a trial vs. paste a key they already have). Setup,
+	 * Integrations, and License keep the lighter notice (see
+	 * render_no_key_notice_compact below).
 	 */
 	private function render_no_key_notice(): void {
+		$license_url  = $this->plugin->get_page_url( DD_Plugin::PAGE_LICENSE );
+		// Signup with UTM so we can attribute trials to the WP plugin admin pre-key state.
+		$trial_url    = 'https://app.dashdolphin.com/signup?utm_source=wordpress&utm_medium=plugin&utm_campaign=prekey_dashboard';
+
+		echo '<section class="dd-section">';
+
+		// Sales hero: explainer + dual CTA.
+		echo '<div class="dd-prekey-hero">';
+		echo '<div class="dd-prekey-eyebrow">' . esc_html__( 'What is Dash Dolphin?', 'dash-dolphin' ) . '</div>';
+		echo '<h2 class="dd-prekey-title">' . esc_html__( 'Instant SMS alerts and smart summaries the moment a form is submitted.', 'dash-dolphin' ) . '</h2>';
+		echo '<p class="dd-prekey-lede">' . esc_html__( 'When a lead fills out a form on your site, Dash Dolphin reads it, writes a one-line summary, and texts you in seconds, before your competitor checks their email.', 'dash-dolphin' ) . '</p>';
+
+		echo '<div class="dd-prekey-ctas">';
+		printf(
+			'<a href="%s" class="button button-primary dd-prekey-cta-primary" target="_blank" rel="noopener">%s</a>',
+			esc_url( $trial_url ),
+			esc_html__( 'Start free trial', 'dash-dolphin' )
+		);
+		printf(
+			'<a href="%s" class="button dd-prekey-cta-secondary">%s</a>',
+			esc_url( $license_url ),
+			esc_html__( 'I already have a key', 'dash-dolphin' )
+		);
+		echo '</div>';
+
+		echo '<p class="dd-prekey-foot">' . esc_html__( '14-day free trial backed by a 60-day money-back guarantee.', 'dash-dolphin' ) . '</p>';
+		echo '</div>'; // .dd-prekey-hero
+
+		echo '</section>';
+
+		// Re-use the existing speed-wins block so the proof and stats are the
+		// first thing a curious admin sees, even before they've added a key.
+		$this->render_speed_value_prop();
+
+		// Sample SMS mockup to show what they're getting.
+		echo '<section class="dd-section">';
+		echo '<div class="dd-prekey-mockup-wrap">';
+		echo '<div class="dd-prekey-mockup-copy">';
+		echo '<h3 class="dd-h3">' . esc_html__( 'What you actually get on your phone', 'dash-dolphin' ) . '</h3>';
+		echo '<p>' . esc_html__( 'No more digging through email. A clean summary, the customer\'s phone, and a tap to call, all in the first text.', 'dash-dolphin' ) . '</p>';
+		echo '<ul class="dd-prekey-list">';
+		echo '<li>' . esc_html__( 'One-line inquiry summary written for you', 'dash-dolphin' ) . '</li>';
+		echo '<li>' . esc_html__( 'Customer phone pre-formatted so a tap calls them back', 'dash-dolphin' ) . '</li>';
+		echo '<li>' . esc_html__( 'SMS scheduling so off-hours leads wait until you\'re ready', 'dash-dolphin' ) . '</li>';
+		echo '<li>' . esc_html__( 'Smart filtering catches spam and test submissions', 'dash-dolphin' ) . '</li>';
+		echo '</ul>';
+		echo '</div>';
+
+		// Mock SMS bubble (CSS-only, no external image, so it always renders).
+		echo '<div class="dd-prekey-phone" role="img" aria-label="' . esc_attr__( 'Example Dash Dolphin alert text message', 'dash-dolphin' ) . '">';
+		echo '<div class="dd-prekey-phone-bezel">';
+		echo '<div class="dd-prekey-phone-bar"><span class="dd-prekey-phone-handle">🟣 Dash Dolphin</span></div>';
+		echo '<div class="dd-prekey-phone-msg">';
+		echo esc_html__( 'New Request Form: Jamie L. wants a garage door spring replaced ASAP for a double door at zip code 74103. Phone: (501) 555-0123.', 'dash-dolphin' );
+		echo '</div>';
+		echo '<div class="dd-prekey-phone-time">' . esc_html__( '3 seconds after submission', 'dash-dolphin' ) . '</div>';
+		echo '</div>';
+		echo '</div>';
+
+		echo '</div>'; // .dd-prekey-mockup-wrap
+		echo '</section>';
+
+		// Final CTA strip.
+		echo '<section class="dd-section">';
+		echo '<div class="dd-prekey-finalcta">';
+		echo '<div class="dd-prekey-finalcta-copy">';
+		echo '<h3 class="dd-h3">' . esc_html__( 'Ready to stop missing leads?', 'dash-dolphin' ) . '</h3>';
+		echo '<p>' . esc_html__( 'Add your Dash Dolphin API key on the License page to connect this site. New here? Start a trial first, then come back and paste your key.', 'dash-dolphin' ) . '</p>';
+		echo '</div>';
+		echo '<div class="dd-prekey-finalcta-buttons">';
+		printf(
+			'<a href="%s" class="button button-primary" target="_blank" rel="noopener">%s</a>',
+			esc_url( $trial_url ),
+			esc_html__( 'Start free trial', 'dash-dolphin' )
+		);
+		printf(
+			'<a href="%s" class="button">%s</a>',
+			esc_url( $license_url ),
+			esc_html__( 'Add API key', 'dash-dolphin' )
+		);
+		echo '</div>';
+		echo '</div>'; // .dd-prekey-finalcta
+		echo '</section>';
+	}
+
+	/**
+	 * Compact "no API key" notice used on Setup, Integrations, and (when
+	 * called from those page handlers) any other inner page. The full
+	 * sales pitch lives on the Dashboard.
+	 */
+	private function render_no_key_notice_compact(): void {
 		echo '<div class="dd-card dd-card--muted">';
 		echo '<p>' . esc_html__( 'Connect this site to your Dash Dolphin account to see your data.', 'dash-dolphin' ) . '</p>';
 		printf(
@@ -650,16 +804,16 @@ class DD_Settings_Page {
 		);
 		submit_button( __( 'Save key', 'dash-dolphin' ), 'primary', 'submit', false );
 		echo '</div>';
-		$dashboard_link = sprintf(
+		$profile_link = sprintf(
 			'<a href="%s" target="_blank" rel="noopener">%s</a>',
-			esc_url( $this->plugin->get_dashboard_url() . '/api-keys' ),
-			esc_html__( 'Dash Dolphin dashboard', 'dash-dolphin' )
+			esc_url( $this->plugin->get_dashboard_url() . '/dashboard?section=settings' ),
+			esc_html__( 'user profile page', 'dash-dolphin' )
 		);
 		echo '<p class="dd-help">' . wp_kses(
 			sprintf(
-				/* translators: %s is an <a> link to the Dash Dolphin dashboard. */
-				__( 'Generate or rotate keys in your %s.', 'dash-dolphin' ),
-				$dashboard_link
+				/* translators: %s is an <a> link to the user profile page in the Dash Dolphin dashboard. */
+				__( 'Generate or rotate keys on the %s in your Dash Dolphin dashboard.', 'dash-dolphin' ),
+				$profile_link
 			),
 			array( 'a' => array( 'href' => array(), 'target' => array(), 'rel' => array() ) )
 		) . '</p>';
@@ -681,7 +835,7 @@ class DD_Settings_Page {
 		echo '</div>';
 		echo '<p class="dd-help">';
 		$this->render_dashboard_link(
-			$dashboard_url . '/settings/billing',
+			$dashboard_url,
 			__( 'Manage billing at app.dashdolphin.com', 'dash-dolphin' )
 		);
 		echo '</p>';
@@ -709,15 +863,12 @@ class DD_Settings_Page {
 			return;
 		}
 
-		$dashboard = $this->plugin->get_dashboard_url();
-
 		echo '<table class="widefat striped dd-table dd-table--wp7">';
 		echo '<thead><tr>';
 		echo '<th>' . esc_html__( 'When', 'dash-dolphin' ) . '</th>';
 		echo '<th>' . esc_html__( 'Form', 'dash-dolphin' ) . '</th>';
 		echo '<th>' . esc_html__( 'Summary', 'dash-dolphin' ) . '</th>';
 		echo '<th class="dd-col-alert">' . esc_html__( 'Alert', 'dash-dolphin' ) . '</th>';
-		echo '<th class="dd-col-actions"></th>';
 		echo '</tr></thead><tbody>';
 		foreach ( $rows as $row ) {
 			$created           = isset( $row['created_at'] ) ? (string) $row['created_at'] : '';
@@ -726,7 +877,6 @@ class DD_Settings_Page {
 			$sms_sent          = ! empty( $row['sms_sent'] );
 			$sms_status        = isset( $row['sms_delivery_status'] ) ? (string) $row['sms_delivery_status'] : '';
 			$processing_status = isset( $row['processing_status'] ) ? (string) $row['processing_status'] : '';
-			$row_id            = isset( $row['id'] ) ? (string) $row['id'] : '';
 
 			echo '<tr>';
 			echo '<td>' . esc_html( $this->format_relative_time( $created ) ) . '</td>';
@@ -735,14 +885,6 @@ class DD_Settings_Page {
 			echo '<td class="dd-col-alert">' . wp_kses_post(
 				$this->render_alert_badge( $sms_sent, $sms_status, $processing_status, $summary )
 			) . '</td>';
-			echo '<td class="dd-col-actions">';
-			if ( $row_id !== '' ) {
-				$this->render_dashboard_link(
-					$dashboard . '/inquiries/' . rawurlencode( $row_id ),
-					__( 'View details', 'dash-dolphin' )
-				);
-			}
-			echo '</td>';
 			echo '</tr>';
 		}
 		echo '</tbody></table>';
@@ -806,7 +948,7 @@ class DD_Settings_Page {
 			return;
 		}
 
-		echo '<table class="widefat striped dd-table dd-table--wp7">';
+		echo '<table class="widefat striped dd-table dd-table--wp7 dd-table--withdetail">';
 		echo '<thead><tr>';
 		echo '<th>' . esc_html__( 'Connection', 'dash-dolphin' ) . '</th>';
 		echo '<th>' . esc_html__( 'Connection Type', 'dash-dolphin' ) . '</th>';
@@ -814,13 +956,17 @@ class DD_Settings_Page {
 		echo '<th class="dd-col-actions"></th>';
 		echo '</tr></thead><tbody>';
 		foreach ( $connections as $conn ) {
-			$name      = isset( $conn['name'] ) ? (string) $conn['name'] : __( 'Untitled', 'dash-dolphin' );
-			$form_type = isset( $conn['form_type'] ) ? (string) $conn['form_type'] : '';
-			$address   = isset( $conn['email_address'] ) ? (string) $conn['email_address'] : '';
+			$name       = isset( $conn['name'] ) ? (string) $conn['name'] : __( 'Untitled', 'dash-dolphin' );
+			$form_type  = isset( $conn['form_type'] ) ? (string) $conn['form_type'] : '';
+			$address    = isset( $conn['email_address'] ) ? (string) $conn['email_address'] : '';
+			$type_label = $form_type !== '' ? $this->humanize_form_type( $form_type ) : '—';
+			$phone      = isset( $conn['phone_number'] ) ? (string) $conn['phone_number'] : '';
+			$schedule   = isset( $conn['weekly_schedule'] ) && is_array( $conn['weekly_schedule'] ) ? $conn['weekly_schedule'] : array();
+			$timezone   = isset( $conn['timezone'] ) ? (string) $conn['timezone'] : '';
 
-			echo '<tr>';
+			echo '<tr class="dd-row-main">';
 			echo '<td>' . esc_html( $name ) . '</td>';
-			echo '<td>' . esc_html( $form_type !== '' ? $this->humanize_form_type( $form_type ) : '—' ) . '</td>';
+			echo '<td>' . esc_html( $type_label ) . '</td>';
 			echo '<td class="dd-cell-code"><code class="dd-code">' . esc_html( $address ) . '</code></td>';
 			echo '<td class="dd-col-actions">';
 			if ( $address !== '' ) {
@@ -830,6 +976,40 @@ class DD_Settings_Page {
 					esc_html__( 'Copy', 'dash-dolphin' )
 				);
 			}
+			echo '</td>';
+			echo '</tr>';
+
+			// Always-visible detail row: phone + schedule for this connection.
+			echo '<tr class="dd-row-detail">';
+			echo '<td colspan="4" class="dd-detail-cell">';
+			echo '<div class="dd-detail-grid">';
+
+			// Phone block.
+			echo '<div class="dd-detail-item">';
+			echo '<div class="dd-detail-label">' . esc_html__( 'Routes alerts to', 'dash-dolphin' ) . '</div>';
+			if ( $phone !== '' ) {
+				echo '<div class="dd-detail-value">' . esc_html( $this->format_phone_number( $phone ) ) . '</div>';
+			} else {
+				echo '<div class="dd-detail-value dd-detail-value--muted">' . esc_html__( 'No phone assigned yet', 'dash-dolphin' ) . '</div>';
+			}
+			echo '</div>';
+
+			// Schedule block.
+			echo '<div class="dd-detail-item">';
+			echo '<div class="dd-detail-label">' . esc_html__( 'When SMS sends', 'dash-dolphin' ) . '</div>';
+			echo '<div class="dd-detail-value">' . esc_html( $this->humanize_schedule( $schedule, $timezone ) ) . '</div>';
+			echo '</div>';
+
+			echo '</div>'; // .dd-detail-grid
+
+			// Link out for changes (read-only plugin).
+			echo '<p class="dd-detail-help">';
+			$this->render_dashboard_link(
+				$this->plugin->get_dashboard_url() . '/dashboard',
+				__( 'Edit phone or schedule in dashboard', 'dash-dolphin' )
+			);
+			echo '</p>';
+
 			echo '</td>';
 			echo '</tr>';
 		}
@@ -926,6 +1106,27 @@ class DD_Settings_Page {
 	}
 
 	/**
+	 * Detected form plugins with both slug and human label.
+	 *
+	 * Used to render the "Detected form plugins" pill row on the Setup page.
+	 * Each entry: [ 'slug' => 'elementor', 'label' => 'Elementor Pro Forms' ].
+	 *
+	 * @return array<int, array{slug: string, label: string}>
+	 */
+	private function get_detected_platforms(): array {
+		$platforms = array();
+		foreach ( DD_Form_Detector::get_all_detectors() as $detector ) {
+			if ( $detector->is_active() ) {
+				$platforms[] = array(
+					'slug'  => $detector->get_slug(),
+					'label' => $detector->get_label(),
+				);
+			}
+		}
+		return $platforms;
+	}
+
+	/**
 	 * Convert a stored platform key into a human label.
 	 */
 	private function humanize_platform( string $platform ): string {
@@ -959,6 +1160,174 @@ class DD_Settings_Page {
 	}
 
 	/**
+	 * Format a stored E.164-ish phone string as a friendly US number when
+	 * possible. Falls back to the raw value for non-US numbers, which the
+	 * Dash Dolphin app supports but we don't try to pretty-print here.
+	 */
+	private function format_phone_number( string $raw ): string {
+		$digits = preg_replace( '/[^0-9]/', '', $raw );
+		if ( null === $digits || '' === $digits ) {
+			return $raw;
+		}
+		if ( strlen( $digits ) === 11 && $digits[0] === '1' ) {
+			return sprintf( '(%s) %s-%s', substr( $digits, 1, 3 ), substr( $digits, 4, 3 ), substr( $digits, 7, 4 ) );
+		}
+		if ( strlen( $digits ) === 10 ) {
+			return sprintf( '(%s) %s-%s', substr( $digits, 0, 3 ), substr( $digits, 3, 3 ), substr( $digits, 6, 4 ) );
+		}
+		return $raw;
+	}
+
+	/**
+	 * Translate an IANA timezone like "America/Chicago" into the short
+	 * abbreviation a service-business owner expects ("CT"). We don't try
+	 * to be daylight-saving aware here: the alerts dashboard owns the
+	 * authoritative schedule, this is a label for the read-only summary.
+	 */
+	private function timezone_short_label( string $iana ): string {
+		$map = array(
+			'America/New_York'    => 'ET',
+			'America/Detroit'     => 'ET',
+			'America/Chicago'     => 'CT',
+			'America/Denver'      => 'MT',
+			'America/Phoenix'     => 'MT',
+			'America/Los_Angeles' => 'PT',
+			'America/Anchorage'   => 'AKT',
+			'Pacific/Honolulu'    => 'HT',
+		);
+		if ( isset( $map[ $iana ] ) ) {
+			return $map[ $iana ];
+		}
+		if ( strpos( $iana, '/' ) !== false ) {
+			$parts = explode( '/', $iana );
+			return str_replace( '_', ' ', end( $parts ) );
+		}
+		return $iana;
+	}
+
+	/**
+	 * Format an HH:MM clock string into a compact display like "9am" or
+	 * "5:30pm". Used by humanize_schedule for custom windows.
+	 */
+	private function format_clock_time( string $hhmm ): string {
+		$ts = strtotime( '2000-01-01 ' . $hhmm );
+		if ( ! $ts ) {
+			return $hhmm;
+		}
+		$min = (int) gmdate( 'i', $ts );
+		return gmdate( $min === 0 ? 'ga' : 'g:ia', $ts );
+	}
+
+	/**
+	 * Render a weekly_schedule jsonb blob as a one-line human summary, e.g.
+	 * "24/7 (CT)" or "Mon-Fri 9am-5pm CT, Sat 10am-2pm CT".
+	 *
+	 * Per-day shape (keys may be capitalized or lowercase):
+	 *   { openTime: '24hours' }              -> always-on that day
+	 *   { openTime: 'HH:MM', closeTime: ...} -> custom window
+	 *   absent / disabled                     -> off that day
+	 *
+	 * An empty {} blob is treated as 24/7 because the routing engine sends
+	 * alerts whenever no schedule is configured.
+	 */
+	private function humanize_schedule( array $schedule, string $timezone ): string {
+		$tz_label = $this->timezone_short_label( $timezone !== '' ? $timezone : 'America/New_York' );
+
+		if ( empty( $schedule ) ) {
+			return sprintf( '24/7 (%s)', $tz_label );
+		}
+
+		$days_order = array( 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday' );
+		$day_short  = array(
+			'monday'    => 'Mon',
+			'tuesday'   => 'Tue',
+			'wednesday' => 'Wed',
+			'thursday'  => 'Thu',
+			'friday'    => 'Fri',
+			'saturday'  => 'Sat',
+			'sunday'    => 'Sun',
+		);
+
+		// Normalize keys to lowercase so we accept both "Monday" and "monday".
+		$norm = array();
+		foreach ( $schedule as $k => $v ) {
+			$norm[ strtolower( (string) $k ) ] = $v;
+		}
+
+		// Per-day status: 'off' | '24h' | 'HH:MM-HH:MM'.
+		$status_by_day = array();
+		foreach ( $days_order as $day ) {
+			$cfg = isset( $norm[ $day ] ) && is_array( $norm[ $day ] ) ? $norm[ $day ] : null;
+			if ( null === $cfg ) {
+				$status_by_day[ $day ] = '24h';
+				continue;
+			}
+			$open = isset( $cfg['openTime'] ) ? (string) $cfg['openTime'] : '';
+			if ( '24hours' === $open ) {
+				$status_by_day[ $day ] = '24h';
+			} elseif ( '' === $open || 'disabled' === $open ) {
+				$status_by_day[ $day ] = 'off';
+			} else {
+				$close = isset( $cfg['closeTime'] ) ? (string) $cfg['closeTime'] : '';
+				if ( '' === $close ) {
+					$status_by_day[ $day ] = 'off';
+				} else {
+					$status_by_day[ $day ] = $open . '-' . $close;
+				}
+			}
+		}
+
+		// Easy cases.
+		$all_24h = true;
+		$all_off = true;
+		foreach ( $status_by_day as $s ) {
+			if ( '24h' !== $s ) { $all_24h = false; }
+			if ( 'off' !== $s ) { $all_off = false; }
+		}
+		if ( $all_24h ) { return sprintf( '24/7 (%s)', $tz_label ); }
+		if ( $all_off ) { return __( 'No days scheduled', 'dash-dolphin' ); }
+
+		// Group contiguous runs that share the same status.
+		$runs = array();
+		$cur  = null;
+		foreach ( $days_order as $idx => $day ) {
+			$s = $status_by_day[ $day ];
+			if ( null === $cur ) {
+				$cur = array( 'start' => $idx, 'end' => $idx, 'status' => $s );
+			} elseif ( $cur['status'] === $s ) {
+				$cur['end'] = $idx;
+			} else {
+				$runs[] = $cur;
+				$cur    = array( 'start' => $idx, 'end' => $idx, 'status' => $s );
+			}
+		}
+		if ( null !== $cur ) { $runs[] = $cur; }
+
+		$parts = array();
+		foreach ( $runs as $run ) {
+			if ( 'off' === $run['status'] ) {
+				continue;
+			}
+			$start_label = $day_short[ $days_order[ $run['start'] ] ];
+			$end_label   = $day_short[ $days_order[ $run['end'] ] ];
+			$range_label = $run['start'] === $run['end'] ? $start_label : $start_label . '-' . $end_label;
+
+			if ( '24h' === $run['status'] ) {
+				$parts[] = $range_label . ' ' . __( '24h', 'dash-dolphin' );
+			} else {
+				$times   = explode( '-', $run['status'], 2 );
+				$parts[] = $range_label . ' ' . $this->format_clock_time( $times[0] ) . '-' . $this->format_clock_time( $times[1] );
+			}
+		}
+
+		if ( empty( $parts ) ) {
+			return __( 'No days scheduled', 'dash-dolphin' );
+		}
+
+		return implode( ', ', $parts ) . ' ' . $tz_label;
+	}
+
+	/**
 	 * Pretty-print an ISO timestamp as relative time (e.g. "5 minutes ago").
 	 */
 	private function format_relative_time( string $iso ): string {
@@ -978,14 +1347,78 @@ class DD_Settings_Page {
 
 	/**
 	 * Render an error notice for a failed API call.
+	 *
+	 * Translates known machine error slugs from the Dash Dolphin API into
+	 * human-readable copy so users never see raw underscored codes like
+	 * "invalid_api_key" or "key_not_found". Unknown slugs are softened by
+	 * humanizing the snake_case as a fallback.
 	 */
 	private function render_error( WP_Error $err, string $prelude ): void {
-		$msg = $err->get_error_message();
+		$msg    = $err->get_error_message();
+		$code   = $err->get_error_code();
+		$status = (int) ( $err->get_error_data()['status'] ?? 0 );
+
+		$friendly = $this->friendly_api_message( $msg, $status );
+
 		echo '<div class="dd-card dd-card--error">';
 		echo '<p><strong>' . esc_html( $prelude ) . '</strong></p>';
-		if ( '' !== $msg ) {
-			echo '<p class="dd-help">' . esc_html( $msg ) . '</p>';
+		if ( '' !== $friendly ) {
+			echo '<p class="dd-help">' . esc_html( $friendly ) . '</p>';
 		}
 		echo '</div>';
+	}
+
+	/**
+	 * Translate a Dash Dolphin API error string into human-friendly copy.
+	 *
+	 * The Supabase edge functions return short machine slugs (invalid_api_key,
+	 * key_not_found, account_inactive, etc.) that bubble straight up to the
+	 * admin UI. This helper maps the known ones to friendly sentences and
+	 * softens unknown slugs by humanizing the snake_case so users never see
+	 * raw lowercase-underscored codes.
+	 */
+	private function friendly_api_message( string $raw, int $status = 0 ): string {
+		$key = strtolower( trim( $raw ) );
+
+		$map = array(
+			'invalid_api_key'        => __( "The API key you entered isn't valid for this site. Double-check that you copied the full key from your Dash Dolphin dashboard. If you're testing with a staging build, make sure the key was issued in your staging account, not production.", 'dash-dolphin' ),
+			'missing_api_key'        => __( 'No API key is configured yet. Add your key on the License page to get started.', 'dash-dolphin' ),
+			'dd_missing_key'         => __( 'No API key is configured yet. Add your key on the License page to get started.', 'dash-dolphin' ),
+			'key_not_found'          => __( "We couldn't find that API key. It may have been rotated or revoked. Generate a new one in your Dash Dolphin dashboard.", 'dash-dolphin' ),
+			'key_revoked'            => __( 'This API key was revoked. Generate a new one in your Dash Dolphin dashboard.', 'dash-dolphin' ),
+			'key_expired'            => __( 'This API key has expired. Generate a new one in your Dash Dolphin dashboard.', 'dash-dolphin' ),
+			'account_inactive'       => __( 'Your Dash Dolphin account is inactive. Check your billing or contact support to reactivate.', 'dash-dolphin' ),
+			'account_suspended'      => __( 'Your Dash Dolphin account is suspended. Contact support to reactivate.', 'dash-dolphin' ),
+			'subscription_canceled'  => __( 'Your subscription is canceled. Reactivate it in the Dash Dolphin dashboard to resume alerts.', 'dash-dolphin' ),
+			'subscription_expired'   => __( 'Your subscription has expired. Renew in the Dash Dolphin dashboard to resume alerts.', 'dash-dolphin' ),
+			'rate_limited'           => __( "You're sending requests faster than the rate limit allows. Try again in a minute.", 'dash-dolphin' ),
+			'forbidden'              => __( "You don't have permission to view this. Confirm you're signed in with the right Dash Dolphin account.", 'dash-dolphin' ),
+			'unauthorized'           => __( 'Sign-in to Dash Dolphin appears to have expired. Re-enter your API key to reconnect.', 'dash-dolphin' ),
+			'not_found'              => __( "We couldn't find that resource in Dash Dolphin.", 'dash-dolphin' ),
+		);
+
+		if ( isset( $map[ $key ] ) ) {
+			return $map[ $key ];
+		}
+
+		// HTTP status fallback when the body didn't include a slug we recognize.
+		if ( '' === $key || $key === (string) (int) $key ) {
+			if ( 401 === $status || 403 === $status ) {
+				return __( "We couldn't authenticate with Dash Dolphin. Double-check your API key.", 'dash-dolphin' );
+			}
+			if ( $status >= 500 ) {
+				return __( 'Dash Dolphin is having trouble responding right now. Please try again in a moment.', 'dash-dolphin' );
+			}
+		}
+
+		// Heuristic: if the message looks like a raw slug (only lowercase /
+		// digits / underscores), turn it into a sentence-cased phrase so the
+		// user sees "Invalid api key" instead of "invalid_api_key". Otherwise
+		// it's already a real sentence and we pass it through unchanged.
+		if ( '' !== $key && preg_match( '/^[a-z0-9_]+$/', $key ) ) {
+			return ucfirst( str_replace( '_', ' ', $key ) ) . '.';
+		}
+
+		return $raw;
 	}
 }

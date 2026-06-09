@@ -3,7 +3,7 @@
  * Plugin Name:       SMS Notifications for WordPress Forms: Dash Dolphin
  * Plugin URI:        https://dashdolphin.com/integrations/wordpress
  * Description:       SMS notifications for WordPress form submissions. Get instant text alerts for Contact Form 7, Gravity Forms, WPForms, Elementor Forms, Fluent Forms, Forminator, Ninja Forms, and Formidable Forms, with smart inquiry summaries and smart filtering. Powered by Dash Dolphin.
- * Version:           0.3.0
+ * Version:           0.3.5
  * Requires at least: 6.0
  * Requires PHP:      7.4
  * Author:            Dash Dolphin
@@ -21,7 +21,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 // Plugin version.
-define( 'DD_VERSION', '0.3.0' );
+define( 'DD_VERSION', '0.3.5' );
 
 // Absolute path to the plugin file.
 define( 'DD_PLUGIN_FILE', __FILE__ );

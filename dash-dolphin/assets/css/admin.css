@@ -83,13 +83,12 @@
 
 .dd-hero {
 	position: relative;
-	/* Layered: dolphin logo watermark on the right + the brand gradient. The
-	   watermark sits at low opacity and is masked to fade into the gradient.
-	   The logo URL is injected via the --dd-hero-logo custom property by the
-	   PHP renderer so the plugin can ship the asset from any URL. */
+	/* Brand-gradient hero. We previously layered the wordmark SVG as a
+	   right-side background watermark, but with a text-based wordmark that
+	   read as a duplicate logo. The foreground .dd-hero-wordmark element is
+	   the single source of brand mark inside the hero. */
 	background:
 		linear-gradient(135deg, rgba(20, 8, 42, 0.92) 0%, rgba(67, 56, 202, 0.88) 55%, rgba(124, 58, 237, 0.92) 100%),
-		var(--dd-hero-logo, none) no-repeat right -60px center / 360px 360px,
 		var(--dd-brand-gradient);
 	color: #fff;
 	border-radius: var(--dd-radius);
@@ -101,23 +100,6 @@
 	gap: 24px;
 	flex-wrap: wrap;
 	overflow: hidden;
-}
-
-.dd-hero::before {
-	/* The actual dolphin watermark, layered on top of the gradient at low
-	   opacity so it reads as a brand mark, not a foreground image. */
-	content: "";
-	position: absolute;
-	inset: -10% -8% -10% auto;
-	width: 420px;
-	background-image: var(--dd-hero-logo, none);
-	background-repeat: no-repeat;
-	background-position: center right;
-	background-size: contain;
-	opacity: 0.18;
-	pointer-events: none;
-	mask-image: linear-gradient(to left, #000 30%, transparent 95%);
-	-webkit-mask-image: linear-gradient(to left, #000 30%, transparent 95%);
 }
 
 .dd-hero::after {
@@ -150,25 +132,33 @@
 }
 
 /*
- * Hero wordmark (v0.3.0+).
+ * Hero brand mark (v0.3.1+).
  *
- * Replaces the previous uppercase "DASH DOLPHIN" text eyebrow with the
- * official SVG wordmark from dashdolphin.com so the plugin header reads
- * as a real brand surface, not a heading. We give the image a fixed
- * display size to match the marketing site header (~180x30) and let the
- * page title sit immediately below it. The SVG itself is
- * white-on-transparent, so it sits cleanly on the dark hero gradient.
+ * The previous .dd-hero-wordmark image embedded the full "Dash Dolphin"
+ * wordmark, which read as a duplicate when combined with the page title
+ * and any background watermark. The hero now leads with the dolphin-only
+ * glyph and a small uppercase "Dash Dolphin" eyebrow above the page
+ * title, mirroring the marketing site's compact lockup.
  */
-.dd-hero-wordmark {
+.dd-hero-mark {
 	display: block;
-	height: 30px;
-	width: auto;
-	max-width: 220px;
-	margin-bottom: 8px;
+	width: 48px;
+	height: 48px;
+	flex: 0 0 auto;
 }
 
-/* Kept for backward compatibility if any older template still emits it. */
 .dd-hero-eyebrow {
+	display: block;
+	margin: 0 0 4px;
+	font-size: 11px;
+	font-weight: 600;
+	letter-spacing: 0.12em;
+	text-transform: uppercase;
+	color: rgba(255, 255, 255, 0.78);
+}
+
+/* Kept for backward compatibility if an older template still emits it. */
+.dd-hero-wordmark {
 	display: none;
 }
 
@@ -612,7 +602,12 @@
 
 .dd-guide-embed iframe {
 	width: 100%;
-	min-height: 520px;
+	/* Lock the player to 16:9 so it scales proportionally as the WP admin
+	   shell stretches wide. Previously a flat 520px min-height meant wide
+	   layouts cropped the bottom of the video. min-height stays as a fallback
+	   for browsers without aspect-ratio support. */
+	aspect-ratio: 16 / 9;
+	min-height: 320px;
 	border: 0;
 	display: block;
 }
@@ -941,4 +936,264 @@
 .dd-hero .dd-link-ext:focus {
 	color: rgba(255, 255, 255, 0.9);
 	text-decoration: underline;
+}
+
+/*
+ * "Detected form plugins" pill row on the Setup page. Each pill deep-links
+ * to the Integrations page filtered to that plugin's walkthrough.
+ */
+.dd-pill-row {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: center;
+	gap: 8px;
+	margin: 14px 0 6px;
+}
+.dd-pill-row-label {
+	color: var(--dd-text-muted);
+	font-size: 13px;
+	font-weight: 500;
+	margin-right: 4px;
+}
+.dd-pill {
+	display: inline-flex;
+	align-items: center;
+	padding: 4px 12px;
+	border-radius: 999px;
+	background: var(--dd-muted-bg);
+	color: var(--dd-brand-purple);
+	font-size: 12px;
+	font-weight: 600;
+	line-height: 1.6;
+	text-decoration: none;
+	border: 1px solid transparent;
+	transition: background-color 120ms ease, border-color 120ms ease, color 120ms ease;
+}
+.dd-pill:hover,
+.dd-pill:focus {
+	background: #fff;
+	border-color: var(--dd-brand-purple);
+	color: var(--dd-brand-purple);
+	text-decoration: none;
+	outline: none;
+}
+.dd-pill:focus-visible {
+	box-shadow: 0 0 0 2px rgba(124, 58, 237, 0.25);
+}
+
+/* Force the "Need a step-by-step walkthrough?" line onto its own row. */
+.dd-help--block {
+	display: block;
+	margin-top: 10px;
+}
+
+/* Profile callout under the API key form on the License page. */
+.dd-profile-callout {
+	margin-top: 12px;
+	padding: 12px 16px;
+}
+.dd-profile-callout .dd-help {
+	margin: 0;
+}
+
+/* =====================================================================
+   v0.3.4: Connection detail row (phone + schedule, always visible)
+   ===================================================================== */
+
+/* Override .striped zebra so the detail row reads as a continuation of
+   its parent main row, not as a separate striped row of its own. */
+.dd-table--withdetail tbody tr.dd-row-detail,
+.dd-table--withdetail tbody tr.dd-row-detail td {
+	background: var(--dd-muted-bg, #f7f5fb) !important;
+}
+.dd-table--withdetail tbody tr.dd-row-main td {
+	border-bottom: 0;
+}
+.dd-row-detail .dd-detail-cell {
+	padding: 14px 16px 16px;
+	border-top: 1px dashed rgba(124, 58, 237, 0.18);
+}
+.dd-detail-grid {
+	display: grid;
+	grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+	gap: 12px 24px;
+	margin-bottom: 8px;
+}
+.dd-detail-item {
+	display: flex;
+	flex-direction: column;
+	gap: 2px;
+}
+.dd-detail-label {
+	font-size: 11px;
+	font-weight: 600;
+	text-transform: uppercase;
+	letter-spacing: 0.04em;
+	color: var(--dd-text-muted);
+}
+.dd-detail-value {
+	font-size: 14px;
+	font-weight: 600;
+	color: var(--dd-text);
+}
+.dd-detail-value--muted {
+	color: var(--dd-text-muted);
+	font-weight: 500;
+	font-style: italic;
+}
+.dd-detail-help {
+	margin: 6px 0 0;
+	font-size: 12px;
+}
+
+/* =====================================================================
+   v0.3.4: Pre-API-key sales pitch on Dashboard
+   ===================================================================== */
+
+.dd-prekey-hero {
+	background: linear-gradient(135deg, #faf7ff 0%, #f1eaff 100%);
+	border: 1px solid rgba(124, 58, 237, 0.18);
+	border-radius: 14px;
+	padding: 28px 32px;
+}
+.dd-prekey-eyebrow {
+	font-size: 12px;
+	font-weight: 700;
+	text-transform: uppercase;
+	letter-spacing: 0.08em;
+	color: var(--dd-brand-purple);
+	margin-bottom: 8px;
+}
+.dd-prekey-title {
+	font-size: 24px;
+	line-height: 1.25;
+	font-weight: 700;
+	margin: 0 0 12px;
+	color: var(--dd-text);
+}
+.dd-prekey-lede {
+	font-size: 15px;
+	line-height: 1.55;
+	color: var(--dd-text);
+	margin: 0 0 18px;
+	max-width: 70ch;
+}
+.dd-prekey-ctas {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 10px;
+	margin-bottom: 10px;
+}
+.dd-prekey-cta-primary.button-primary {
+	height: auto;
+	padding: 8px 18px;
+	font-size: 14px;
+}
+.dd-prekey-cta-secondary.button {
+	height: auto;
+	padding: 8px 18px;
+	font-size: 14px;
+}
+.dd-prekey-foot {
+	margin: 6px 0 0;
+	font-size: 12px;
+	color: var(--dd-text-muted);
+}
+
+.dd-prekey-mockup-wrap {
+	display: grid;
+	grid-template-columns: minmax(0, 1fr) minmax(220px, 280px);
+	gap: 32px;
+	align-items: center;
+	background: #fff;
+	border: 1px solid var(--dd-border, #e4e2ec);
+	border-radius: 14px;
+	padding: 24px 28px;
+}
+.dd-prekey-mockup-copy .dd-h3 {
+	margin: 0 0 8px;
+	font-size: 18px;
+	font-weight: 700;
+}
+.dd-prekey-list {
+	margin: 12px 0 0;
+	padding-left: 18px;
+	font-size: 14px;
+	line-height: 1.6;
+	color: var(--dd-text);
+}
+.dd-prekey-list li {
+	margin: 4px 0;
+}
+
+/* Mock phone bubble (CSS-only). */
+.dd-prekey-phone {
+	display: flex;
+	justify-content: center;
+}
+.dd-prekey-phone-bezel {
+	background: #1f1f23;
+	border-radius: 22px;
+	padding: 14px 12px 18px;
+	width: 100%;
+	max-width: 260px;
+	box-shadow: 0 12px 30px rgba(31, 31, 35, 0.18);
+}
+.dd-prekey-phone-bar {
+	color: #fff;
+	font-size: 11px;
+	opacity: 0.78;
+	margin-bottom: 8px;
+	text-align: center;
+}
+.dd-prekey-phone-msg {
+	background: #2c3e9e;
+	color: #fff;
+	padding: 10px 12px;
+	border-radius: 14px 14px 14px 4px;
+	font-size: 13px;
+	line-height: 1.45;
+}
+.dd-prekey-phone-time {
+	margin-top: 6px;
+	font-size: 11px;
+	color: #b8b5c1;
+	text-align: right;
+}
+
+.dd-prekey-finalcta {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 18px;
+	align-items: center;
+	justify-content: space-between;
+	background: var(--dd-muted-bg, #f7f5fb);
+	border: 1px solid var(--dd-border, #e4e2ec);
+	border-radius: 14px;
+	padding: 22px 28px;
+}
+.dd-prekey-finalcta-copy .dd-h3 {
+	margin: 0 0 4px;
+	font-size: 18px;
+	font-weight: 700;
+}
+.dd-prekey-finalcta-copy p {
+	margin: 0;
+	color: var(--dd-text-muted);
+	font-size: 14px;
+	max-width: 60ch;
+}
+.dd-prekey-finalcta-buttons {
+	display: flex;
+	gap: 10px;
+	flex-wrap: wrap;
+}
+
+@media (max-width: 782px) {
+	.dd-prekey-mockup-wrap {
+		grid-template-columns: 1fr;
+	}
+	.dd-prekey-title {
+		font-size: 20px;
+	}
 }

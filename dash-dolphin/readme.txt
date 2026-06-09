@@ -4,7 +4,7 @@ Tags: sms, form notifications, sms alerts, contact form sms, lead alerts
 Requires at least: 6.0
 Tested up to: 6.6
 Requires PHP: 7.4
-Stable tag: 0.3.0
+Stable tag: 0.3.5
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -58,7 +58,7 @@ A Dash Dolphin account is required. Sign up at https://dashdolphin.com.
 2. Activate the plugin through the Plugins menu in your WordPress admin.
 3. In your WordPress admin sidebar, click Dash Dolphin > License.
 4. Paste your Dash Dolphin API key. You can create one at https://app.dashdolphin.com/api-keys.
-5. Visit Dash Dolphin > Connections, copy a connection address, and paste it into the BCC field of any form's admin notification email. Save the form.
+5. Visit Dash Dolphin > Setup, copy a connection address, and paste it into the BCC field of any form's admin notification email. Save the form.
 6. Submit a test entry. You should receive an SMS within seconds.
 
 == Frequently Asked Questions ==
@@ -102,11 +102,40 @@ That happens when your dashboard browser session is signed into a different Dash
 == Screenshots ==
 
 1. The Dash Dolphin Dashboard tab in WordPress: recent inquiries, smart summaries, and SMS delivery status at a glance.
-2. The Connections tab: paste a single BCC address into any form to wire it up.
+2. The Setup tab: paste a single BCC address into any form to wire it up.
 3. The Setup tab: step-by-step walkthroughs for each supported form plugin, with the platforms you actually use auto-detected and surfaced first.
 4. A sample SMS alert: lead name, intent, and contact info, delivered in seconds.
 
 == Changelog ==
+
+= 0.3.5 =
+* Improved: Setup connections detail row (assigned phone, schedule, timezone) is always visible, no longer behind a click-to-expand toggle.
+* Improved: Pre-key Dashboard copy. Hero lede tightened, trial call-to-action now routes to app.dashdolphin.com/signup with a WordPress-source UTM, and trial footnote correctly references the 14-day trial and 60-day money-back guarantee.
+* Improved: Sample SMS mockup is more representative (extended lead detail, removed STOP boilerplate) and the supporting bullet calls out tap-to-call plus off-hours SMS scheduling.
+* Improved: License page now points to the user profile page in your Dash Dolphin dashboard for generating or rotating API keys.
+
+= 0.3.4 =
+* New: Expandable row on the Setup connections table reveals the phone number that receives alerts and the routing schedule for that connection (read-only view of what's configured in your Dash Dolphin dashboard).
+* New: Dashboard tab now leads with a value-prop hero, speed-of-response stats, sample SMS mockup, and a clear "Start free trial / Add API key" dual call-to-action when no API key is configured. Helpful for admins who installed the plugin without context.
+* Improved: humanize_schedule renders "24/7 (CT)" for always-on connections and "Mon-Fri 9am-5pm CT" style copy for custom windows.
+* Improved: Setup, Integrations, and License pages keep a lighter notice when no key is set so the sales pitch only appears on the Dashboard.
+
+= 0.3.3 =
+* New: "Detected form plugins" pill row on the Setup page. Each detected plugin appears as a pill that deep-links to its walkthrough on the Integrations page.
+* New: License page now includes a pointer to the user profile page in the Dash Dolphin dashboard for updating name, email, phone number, or password.
+* Improved: "Need a step-by-step walkthrough? See the Integrations page" sits on its own line below the BCC explainer instead of running on after it.
+* Improved: API error messages are now human-readable. "invalid_api_key" and similar machine slugs are translated into friendly explanations (with extra context when a staging build is being used against a production key).
+* Improved: Connection Type column on the Setup page is back to plain text. The walkthrough deep-link path now lives on the pill row at the top of the page, where new users will find it first.
+
+= 0.3.2 =
+* New: Renamed menu items for clarity. The wiring page is now "Setup" (where you grab connection addresses for your forms) and the walkthrough page is now "Integrations" (step-by-step videos for each form plugin).
+* New: Per-row Walkthrough links on the Setup table jump straight to the matching Integrations walkthrough for that form plugin.
+* New: Setup page cross-links to Integrations from the intro copy when a step-by-step is helpful.
+* New: Color Dash Dolphin menu icon in the WordPress admin sidebar.
+* Improved: Walkthrough video player now uses a 16:9 aspect ratio so it scales correctly on wide screens instead of stretching.
+* Improved: Hero header on every plugin page now leads with the Dash Dolphin brand mark and eyebrow.
+* Fixed: Outbound links from Recent inquiries, Connection addresses, and the empty-state CTA now route to live dashboard routes instead of 404 pages.
+* Compatibility: Old "dash-dolphin-connections" admin URL automatically 301-redirects to "dash-dolphin-setup" so bookmarks keep working.
 
 = 0.3.0 =
 * New: Speed-of-response value-prop panel on the Dashboard tab with proof points from dashdolphin.com.
@@ -132,6 +161,18 @@ That happens when your dashboard browser session is signed into a different Dash
 * Initial development scaffold.
 
 == Upgrade Notice ==
+
+= 0.3.5 =
+Copy and layout polish on the pre-key Dashboard and Setup pages. Connection detail row is now always visible. Safe upgrade.
+
+= 0.3.4 =
+Setup page now shows the assigned phone and schedule per connection (click the row to expand). Dashboard is also more useful before you've added an API key, with a clear product explainer and trial CTA. Safe upgrade.
+
+= 0.3.3 =
+Detected form plugin pills on Setup, friendlier API error messages, and a profile link on the License page. Safe upgrade.
+
+= 0.3.2 =
+Clearer menu labels (Setup for connection addresses, Integrations for walkthroughs), per-row walkthrough links, color sidebar icon, fixed video aspect ratio, and corrected outbound dashboard links. Safe upgrade. Old bookmarks redirect automatically.
 
 = 0.3.0 =
 Faster setup, cleaner UI, and clearer messaging about which Dash Dolphin account each inquiry belongs to. Safe upgrade.
