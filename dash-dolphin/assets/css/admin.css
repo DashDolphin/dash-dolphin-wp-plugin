@@ -939,21 +939,59 @@
 }
 
 /*
- * Inline platform link inside the connection table's "Connection Type" cell,
- * and the auxiliary "Walkthrough" link in the actions cell. Both deep-link
- * to the matching guide on the Integrations page.
+ * "Detected form plugins" pill row on the Setup page. Each pill deep-links
+ * to the Integrations page filtered to that plugin's walkthrough.
  */
-.dd-inline-link {
-	color: var(--dd-brand-purple, #6f3df8);
-	text-decoration: none;
+.dd-pill-row {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: center;
+	gap: 8px;
+	margin: 14px 0 6px;
+}
+.dd-pill-row-label {
+	color: var(--dd-text-muted);
+	font-size: 13px;
 	font-weight: 500;
+	margin-right: 4px;
 }
-.dd-inline-link:hover,
-.dd-inline-link:focus {
-	text-decoration: underline;
-}
-.dd-walk-link {
-	margin-left: 8px;
+.dd-pill {
+	display: inline-flex;
+	align-items: center;
+	padding: 4px 12px;
+	border-radius: 999px;
+	background: var(--dd-muted-bg);
+	color: var(--dd-brand-purple);
 	font-size: 12px;
-	white-space: nowrap;
+	font-weight: 600;
+	line-height: 1.6;
+	text-decoration: none;
+	border: 1px solid transparent;
+	transition: background-color 120ms ease, border-color 120ms ease, color 120ms ease;
+}
+.dd-pill:hover,
+.dd-pill:focus {
+	background: #fff;
+	border-color: var(--dd-brand-purple);
+	color: var(--dd-brand-purple);
+	text-decoration: none;
+	outline: none;
+}
+.dd-pill:focus-visible {
+	box-shadow: 0 0 0 2px rgba(124, 58, 237, 0.25);
+}
+
+/* Force the "Need a step-by-step walkthrough?" line onto its own row. */
+.dd-help--block {
+	display: block;
+	margin-top: 10px;
+}
+
+/* Profile callout under the API key form on the License page. */
+.dd-profile-callout {
+	margin-top: 12px;
+	padding: 12px 16px;
+}
+.dd-profile-callout .dd-help {
+	margin: 0;
 }

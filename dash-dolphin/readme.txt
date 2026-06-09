@@ -108,6 +108,13 @@ That happens when your dashboard browser session is signed into a different Dash
 
 == Changelog ==
 
+= 0.3.3 =
+* New: "Detected form plugins" pill row on the Setup page. Each detected plugin appears as a pill that deep-links to its walkthrough on the Integrations page.
+* New: License page now includes a pointer to the user profile page in the Dash Dolphin dashboard for updating name, email, phone number, or password.
+* Improved: "Need a step-by-step walkthrough? See the Integrations page" sits on its own line below the BCC explainer instead of running on after it.
+* Improved: API error messages are now human-readable. "invalid_api_key" and similar machine slugs are translated into friendly explanations (with extra context when a staging build is being used against a production key).
+* Improved: Connection Type column on the Setup page is back to plain text. The walkthrough deep-link path now lives on the pill row at the top of the page, where new users will find it first.
+
 = 0.3.2 =
 * New: Renamed menu items for clarity. The wiring page is now "Setup" (where you grab connection addresses for your forms) and the walkthrough page is now "Integrations" (step-by-step videos for each form plugin).
 * New: Per-row Walkthrough links on the Setup table jump straight to the matching Integrations walkthrough for that form plugin.
@@ -142,6 +149,9 @@ That happens when your dashboard browser session is signed into a different Dash
 * Initial development scaffold.
 
 == Upgrade Notice ==
+
+= 0.3.3 =
+Detected form plugin pills on Setup, friendlier API error messages, and a profile link on the License page. Safe upgrade.
 
 = 0.3.2 =
 Clearer menu labels (Setup for connection addresses, Integrations for walkthroughs), per-row walkthrough links, color sidebar icon, fixed video aspect ratio, and corrected outbound dashboard links. Safe upgrade. Old bookmarks redirect automatically.

@@ -208,6 +208,9 @@ class DD_Settings_Page {
 		$resp      = $client->get_forwarding_emails();
 		$dashboard = $this->plugin->get_dashboard_url();
 
+		$integrations_url       = $this->plugin->get_page_url( DD_Plugin::PAGE_INTEGRATIONS );
+		$detected_platforms     = $this->get_detected_platforms();
+
 		echo '<section class="dd-section">';
 		echo '<h2 class="dd-h2">' . esc_html__( 'How setup works', 'dash-dolphin' ) . '</h2>';
 		echo '<div class="dd-card">';
@@ -217,13 +220,34 @@ class DD_Settings_Page {
 		echo '<li>' . esc_html__( 'Paste the connection address into the BCC field, then save.', 'dash-dolphin' ) . '</li>';
 		echo '<li>' . esc_html__( 'Submit a test to confirm alerts arrive.', 'dash-dolphin' ) . '</li>';
 		echo '</ol>';
+		echo '<p class="dd-help">' . esc_html__( 'BCC keeps the address hidden from your customer and from your existing notification recipients.', 'dash-dolphin' ) . '</p>';
+
+		// Detected form plugins, rendered as pills inside the same card. Each
+		// pill deep-links to the Integrations page filtered to that plugin's
+		// walkthrough. We surface this row only when at least one supported
+		// form plugin is active on the site; otherwise the generic
+		// "see the Integrations page" line below carries the load.
+		if ( ! empty( $detected_platforms ) ) {
+			echo '<div class="dd-pill-row">';
+			echo '<span class="dd-pill-row-label">' . esc_html__( 'Detected form plugins:', 'dash-dolphin' ) . '</span>';
+			foreach ( $detected_platforms as $platform ) {
+				printf(
+					'<a class="dd-pill" href="%s">%s</a>',
+					esc_url( add_query_arg( 'guide', $platform['slug'], $integrations_url ) ),
+					esc_html( $platform['label'] )
+				);
+			}
+			echo '</div>';
+		}
+
+		// Walkthrough line, always on its own line below the BCC sentence and
+		// (when present) below the detected-platform pills.
 		printf(
-			'<p class="dd-help">%s %s</p>',
-			esc_html__( 'BCC keeps the address hidden from your customer and from your existing notification recipients.', 'dash-dolphin' ),
+			'<p class="dd-help dd-help--block">%s</p>',
 			sprintf(
 				/* translators: %s is a link to the Integrations page. */
 				wp_kses( __( 'Need a step-by-step walkthrough? See the %s page.', 'dash-dolphin' ), array( 'a' => array( 'href' => array() ) ) ),
-				'<a href="' . esc_url( $this->plugin->get_page_url( DD_Plugin::PAGE_INTEGRATIONS ) ) . '">' . esc_html__( 'Integrations', 'dash-dolphin' ) . '</a>'
+				'<a href="' . esc_url( $integrations_url ) . '">' . esc_html__( 'Integrations', 'dash-dolphin' ) . '</a>'
 			)
 		);
 		echo '</div>';
@@ -418,6 +442,26 @@ class DD_Settings_Page {
 		echo '<section class="dd-section">';
 		echo '<h2 class="dd-h2">' . esc_html__( 'API key', 'dash-dolphin' ) . '</h2>';
 		$this->render_api_key_form( $api_key );
+
+		// Pointer to the user profile in the Dash Dolphin web app. Deep-links to
+		// the Dashboard with ?section=settings so the Settings tab opens directly.
+		$profile_url = $this->plugin->get_dashboard_url() . '/dashboard?section=settings';
+		echo '<div class="dd-card dd-card--muted dd-profile-callout">';
+		echo '<p class="dd-help">';
+		printf(
+			/* translators: %s is a link to the user profile page in the Dash Dolphin dashboard. */
+			wp_kses(
+				__( 'Need to update your name, email, phone number, or password? Visit the %s in the Dash Dolphin dashboard.', 'dash-dolphin' ),
+				array( 'a' => array( 'href' => array(), 'target' => array(), 'rel' => array() ) )
+			),
+			sprintf(
+				'<a href="%s" target="_blank" rel="noopener">%s</a>',
+				esc_url( $profile_url ),
+				esc_html__( 'user profile page', 'dash-dolphin' )
+			)
+		);
+		echo '</p>';
+		echo '</div>';
 		echo '</section>';
 
 		if ( $this->plugin->has_api_key() ) {
@@ -807,8 +851,6 @@ class DD_Settings_Page {
 			return;
 		}
 
-		$integrations_url = $this->plugin->get_page_url( DD_Plugin::PAGE_INTEGRATIONS );
-
 		echo '<table class="widefat striped dd-table dd-table--wp7">';
 		echo '<thead><tr>';
 		echo '<th>' . esc_html__( 'Connection', 'dash-dolphin' ) . '</th>';
@@ -817,31 +859,14 @@ class DD_Settings_Page {
 		echo '<th class="dd-col-actions"></th>';
 		echo '</tr></thead><tbody>';
 		foreach ( $connections as $conn ) {
-			$name      = isset( $conn['name'] ) ? (string) $conn['name'] : __( 'Untitled', 'dash-dolphin' );
-			$form_type = isset( $conn['form_type'] ) ? (string) $conn['form_type'] : '';
-			$address   = isset( $conn['email_address'] ) ? (string) $conn['email_address'] : '';
-
-			// Deep-link to the Integrations page filtered to this platform's
-			// walkthrough. The Integrations filter accepts the same slug key
-			// (e.g. "elementor", "gravity-forms") that we store in form_type.
-			$type_label = $form_type !== '' ? $this->humanize_form_type( $form_type ) : '';
-			$walk_url   = $form_type !== ''
-				? add_query_arg( 'guide', $form_type, $integrations_url )
-				: '';
+			$name       = isset( $conn['name'] ) ? (string) $conn['name'] : __( 'Untitled', 'dash-dolphin' );
+			$form_type  = isset( $conn['form_type'] ) ? (string) $conn['form_type'] : '';
+			$address    = isset( $conn['email_address'] ) ? (string) $conn['email_address'] : '';
+			$type_label = $form_type !== '' ? $this->humanize_form_type( $form_type ) : '—';
 
 			echo '<tr>';
 			echo '<td>' . esc_html( $name ) . '</td>';
-			echo '<td>';
-			if ( '' !== $walk_url ) {
-				printf(
-					'<a href="%s" class="dd-inline-link">%s</a>',
-					esc_url( $walk_url ),
-					esc_html( $type_label )
-				);
-			} else {
-				echo esc_html( '—' );
-			}
-			echo '</td>';
+			echo '<td>' . esc_html( $type_label ) . '</td>';
 			echo '<td class="dd-cell-code"><code class="dd-code">' . esc_html( $address ) . '</code></td>';
 			echo '<td class="dd-col-actions">';
 			if ( $address !== '' ) {
@@ -849,13 +874,6 @@ class DD_Settings_Page {
 					'<button type="button" class="button dd-copy" data-dd-copy="%s">%s</button>',
 					esc_attr( $address ),
 					esc_html__( 'Copy', 'dash-dolphin' )
-				);
-			}
-			if ( '' !== $walk_url ) {
-				printf(
-					' <a class="button-link dd-walk-link" href="%s">%s</a>',
-					esc_url( $walk_url ),
-					esc_html__( 'Walkthrough', 'dash-dolphin' )
 				);
 			}
 			echo '</td>';
@@ -954,6 +972,27 @@ class DD_Settings_Page {
 	}
 
 	/**
+	 * Detected form plugins with both slug and human label.
+	 *
+	 * Used to render the "Detected form plugins" pill row on the Setup page.
+	 * Each entry: [ 'slug' => 'elementor', 'label' => 'Elementor Pro Forms' ].
+	 *
+	 * @return array<int, array{slug: string, label: string}>
+	 */
+	private function get_detected_platforms(): array {
+		$platforms = array();
+		foreach ( DD_Form_Detector::get_all_detectors() as $detector ) {
+			if ( $detector->is_active() ) {
+				$platforms[] = array(
+					'slug'  => $detector->get_slug(),
+					'label' => $detector->get_label(),
+				);
+			}
+		}
+		return $platforms;
+	}
+
+	/**
 	 * Convert a stored platform key into a human label.
 	 */
 	private function humanize_platform( string $platform ): string {
@@ -1006,14 +1045,78 @@ class DD_Settings_Page {
 
 	/**
 	 * Render an error notice for a failed API call.
+	 *
+	 * Translates known machine error slugs from the Dash Dolphin API into
+	 * human-readable copy so users never see raw underscored codes like
+	 * "invalid_api_key" or "key_not_found". Unknown slugs are softened by
+	 * humanizing the snake_case as a fallback.
 	 */
 	private function render_error( WP_Error $err, string $prelude ): void {
-		$msg = $err->get_error_message();
+		$msg    = $err->get_error_message();
+		$code   = $err->get_error_code();
+		$status = (int) ( $err->get_error_data()['status'] ?? 0 );
+
+		$friendly = $this->friendly_api_message( $msg, $status );
+
 		echo '<div class="dd-card dd-card--error">';
 		echo '<p><strong>' . esc_html( $prelude ) . '</strong></p>';
-		if ( '' !== $msg ) {
-			echo '<p class="dd-help">' . esc_html( $msg ) . '</p>';
+		if ( '' !== $friendly ) {
+			echo '<p class="dd-help">' . esc_html( $friendly ) . '</p>';
 		}
 		echo '</div>';
+	}
+
+	/**
+	 * Translate a Dash Dolphin API error string into human-friendly copy.
+	 *
+	 * The Supabase edge functions return short machine slugs (invalid_api_key,
+	 * key_not_found, account_inactive, etc.) that bubble straight up to the
+	 * admin UI. This helper maps the known ones to friendly sentences and
+	 * softens unknown slugs by humanizing the snake_case so users never see
+	 * raw lowercase-underscored codes.
+	 */
+	private function friendly_api_message( string $raw, int $status = 0 ): string {
+		$key = strtolower( trim( $raw ) );
+
+		$map = array(
+			'invalid_api_key'        => __( "The API key you entered isn't valid for this site. Double-check that you copied the full key from your Dash Dolphin dashboard. If you're testing with a staging build, make sure the key was issued in your staging account, not production.", 'dash-dolphin' ),
+			'missing_api_key'        => __( 'No API key is configured yet. Add your key on the License page to get started.', 'dash-dolphin' ),
+			'dd_missing_key'         => __( 'No API key is configured yet. Add your key on the License page to get started.', 'dash-dolphin' ),
+			'key_not_found'          => __( "We couldn't find that API key. It may have been rotated or revoked. Generate a new one in your Dash Dolphin dashboard.", 'dash-dolphin' ),
+			'key_revoked'            => __( 'This API key was revoked. Generate a new one in your Dash Dolphin dashboard.', 'dash-dolphin' ),
+			'key_expired'            => __( 'This API key has expired. Generate a new one in your Dash Dolphin dashboard.', 'dash-dolphin' ),
+			'account_inactive'       => __( 'Your Dash Dolphin account is inactive. Check your billing or contact support to reactivate.', 'dash-dolphin' ),
+			'account_suspended'      => __( 'Your Dash Dolphin account is suspended. Contact support to reactivate.', 'dash-dolphin' ),
+			'subscription_canceled'  => __( 'Your subscription is canceled. Reactivate it in the Dash Dolphin dashboard to resume alerts.', 'dash-dolphin' ),
+			'subscription_expired'   => __( 'Your subscription has expired. Renew in the Dash Dolphin dashboard to resume alerts.', 'dash-dolphin' ),
+			'rate_limited'           => __( "You're sending requests faster than the rate limit allows. Try again in a minute.", 'dash-dolphin' ),
+			'forbidden'              => __( "You don't have permission to view this. Confirm you're signed in with the right Dash Dolphin account.", 'dash-dolphin' ),
+			'unauthorized'           => __( 'Sign-in to Dash Dolphin appears to have expired. Re-enter your API key to reconnect.', 'dash-dolphin' ),
+			'not_found'              => __( "We couldn't find that resource in Dash Dolphin.", 'dash-dolphin' ),
+		);
+
+		if ( isset( $map[ $key ] ) ) {
+			return $map[ $key ];
+		}
+
+		// HTTP status fallback when the body didn't include a slug we recognize.
+		if ( '' === $key || $key === (string) (int) $key ) {
+			if ( 401 === $status || 403 === $status ) {
+				return __( "We couldn't authenticate with Dash Dolphin. Double-check your API key.", 'dash-dolphin' );
+			}
+			if ( $status >= 500 ) {
+				return __( 'Dash Dolphin is having trouble responding right now. Please try again in a moment.', 'dash-dolphin' );
+			}
+		}
+
+		// Heuristic: if the message looks like a raw slug (only lowercase /
+		// digits / underscores), turn it into a sentence-cased phrase so the
+		// user sees "Invalid api key" instead of "invalid_api_key". Otherwise
+		// it's already a real sentence and we pass it through unchanged.
+		if ( '' !== $key && preg_match( '/^[a-z0-9_]+$/', $key ) ) {
+			return ucfirst( str_replace( '_', ' ', $key ) ) . '.';
+		}
+
+		return $raw;
 	}
 }
