@@ -739,7 +739,7 @@ class DD_Settings_Page {
 		echo '<div class="dd-prekey-phone-msg">';
 		echo esc_html__( 'New Request Form: Jamie L. wants a garage door spring replaced ASAP for a double door at zip code 74103. Phone: (501) 555-0123.', 'dash-dolphin' );
 		echo '</div>';
-		echo '<div class="dd-prekey-phone-time">' . esc_html__( '12 seconds after submission', 'dash-dolphin' ) . '</div>';
+		echo '<div class="dd-prekey-phone-time">' . esc_html__( '3 seconds after submission', 'dash-dolphin' ) . '</div>';
 		echo '</div>';
 		echo '</div>';
 
