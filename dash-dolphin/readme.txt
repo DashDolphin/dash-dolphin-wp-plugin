@@ -108,6 +108,12 @@ That happens when your dashboard browser session is signed into a different Dash
 
 == Changelog ==
 
+= 0.3.4 =
+* New: Expandable row on the Setup connections table reveals the phone number that receives alerts and the routing schedule for that connection (read-only view of what's configured in your Dash Dolphin dashboard).
+* New: Dashboard tab now leads with a value-prop hero, speed-of-response stats, sample SMS mockup, and a clear "Start free trial / Add API key" dual call-to-action when no API key is configured. Helpful for admins who installed the plugin without context.
+* Improved: humanize_schedule renders "24/7 (CT)" for always-on connections and "Mon-Fri 9am-5pm CT" style copy for custom windows.
+* Improved: Setup, Integrations, and License pages keep a lighter notice when no key is set so the sales pitch only appears on the Dashboard.
+
 = 0.3.3 =
 * New: "Detected form plugins" pill row on the Setup page. Each detected plugin appears as a pill that deep-links to its walkthrough on the Integrations page.
 * New: License page now includes a pointer to the user profile page in the Dash Dolphin dashboard for updating name, email, phone number, or password.
@@ -149,6 +155,9 @@ That happens when your dashboard browser session is signed into a different Dash
 * Initial development scaffold.
 
 == Upgrade Notice ==
+
+= 0.3.4 =
+Setup page now shows the assigned phone and schedule per connection (click the row to expand). Dashboard is also more useful before you've added an API key, with a clear product explainer and trial CTA. Safe upgrade.
 
 = 0.3.3 =
 Detected form plugin pills on Setup, friendlier API error messages, and a profile link on the License page. Safe upgrade.

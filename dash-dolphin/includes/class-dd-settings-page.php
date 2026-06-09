@@ -199,7 +199,7 @@ class DD_Settings_Page {
 		$this->open_shell( DD_Plugin::PAGE_SETUP );
 
 		if ( ! $this->plugin->has_api_key() ) {
-			$this->render_no_key_notice();
+			$this->render_no_key_notice_compact();
 			$this->close_shell( DD_Plugin::PAGE_SETUP );
 			return;
 		}
@@ -286,7 +286,7 @@ class DD_Settings_Page {
 		$this->open_shell( DD_Plugin::PAGE_INTEGRATIONS );
 
 		if ( ! $this->plugin->has_api_key() ) {
-			$this->render_no_key_notice();
+			$this->render_no_key_notice_compact();
 			$this->close_shell( DD_Plugin::PAGE_INTEGRATIONS );
 			return;
 		}
@@ -674,10 +674,106 @@ class DD_Settings_Page {
 	}
 
 	/**
-	 * Notice that appears on Dashboard/Connections/Setup when no API key
-	 * is set yet, with a direct link to the License page.
+	 * Full-page sales pitch for Dashboard when no API key is set yet.
+	 *
+	 * Users land here straight from the WordPress plugin directory and may
+	 * have no context on what Dash Dolphin is. We give them: a clear value
+	 * lead-in, the speed-of-response stats, a customer outcome quote, and
+	 * dual CTAs (start a trial vs. paste a key they already have). Setup,
+	 * Integrations, and License keep the lighter notice (see
+	 * render_no_key_notice_compact below).
 	 */
 	private function render_no_key_notice(): void {
+		$license_url  = $this->plugin->get_page_url( DD_Plugin::PAGE_LICENSE );
+		$trial_url    = 'https://www.dashdolphin.com/'; // marketing site handles signup
+
+		echo '<section class="dd-section">';
+
+		// Sales hero: explainer + dual CTA.
+		echo '<div class="dd-prekey-hero">';
+		echo '<div class="dd-prekey-eyebrow">' . esc_html__( 'What is Dash Dolphin?', 'dash-dolphin' ) . '</div>';
+		echo '<h2 class="dd-prekey-title">' . esc_html__( 'Instant SMS alerts and smart summaries the moment a form is submitted.', 'dash-dolphin' ) . '</h2>';
+		echo '<p class="dd-prekey-lede">' . esc_html__( 'When a lead fills out a form on your site, Dash Dolphin reads it, writes a one-line summary, and texts you in seconds, before your competitor checks their email. Customers reply, you reply. Jobs get booked.', 'dash-dolphin' ) . '</p>';
+
+		echo '<div class="dd-prekey-ctas">';
+		printf(
+			'<a href="%s" class="button button-primary dd-prekey-cta-primary" target="_blank" rel="noopener">%s</a>',
+			esc_url( $trial_url ),
+			esc_html__( 'Start free trial', 'dash-dolphin' )
+		);
+		printf(
+			'<a href="%s" class="button dd-prekey-cta-secondary">%s</a>',
+			esc_url( $license_url ),
+			esc_html__( 'I already have a key', 'dash-dolphin' )
+		);
+		echo '</div>';
+
+		echo '<p class="dd-prekey-foot">' . esc_html__( 'A 14-day free trial includes inquiry summaries, instant alerts to two phones, and routing schedules. No credit card needed.', 'dash-dolphin' ) . '</p>';
+		echo '</div>'; // .dd-prekey-hero
+
+		echo '</section>';
+
+		// Re-use the existing speed-wins block so the proof and stats are the
+		// first thing a curious admin sees, even before they've added a key.
+		$this->render_speed_value_prop();
+
+		// Sample SMS mockup to show what they're getting.
+		echo '<section class="dd-section">';
+		echo '<div class="dd-prekey-mockup-wrap">';
+		echo '<div class="dd-prekey-mockup-copy">';
+		echo '<h3 class="dd-h3">' . esc_html__( 'What you actually get on your phone', 'dash-dolphin' ) . '</h3>';
+		echo '<p>' . esc_html__( 'No more digging through email. A clean summary, the customer\'s phone, and a tap to reply, all in the first text.', 'dash-dolphin' ) . '</p>';
+		echo '<ul class="dd-prekey-list">';
+		echo '<li>' . esc_html__( 'One-line inquiry summary written for you', 'dash-dolphin' ) . '</li>';
+		echo '<li>' . esc_html__( 'Customer phone pre-formatted so a tap calls them back', 'dash-dolphin' ) . '</li>';
+		echo '<li>' . esc_html__( 'Routes to up to two phones with a routing schedule per connection', 'dash-dolphin' ) . '</li>';
+		echo '<li>' . esc_html__( 'Smart filtering catches spam and test submissions', 'dash-dolphin' ) . '</li>';
+		echo '</ul>';
+		echo '</div>';
+
+		// Mock SMS bubble (CSS-only, no external image, so it always renders).
+		echo '<div class="dd-prekey-phone" role="img" aria-label="' . esc_attr__( 'Example Dash Dolphin alert text message', 'dash-dolphin' ) . '">';
+		echo '<div class="dd-prekey-phone-bezel">';
+		echo '<div class="dd-prekey-phone-bar"><span class="dd-prekey-phone-handle">🟣 Dash Dolphin</span></div>';
+		echo '<div class="dd-prekey-phone-msg">';
+		echo esc_html__( 'New Request Form: Jamie L. wants a garage door spring replaced ASAP. Phone: (501) 555-0123. Reply STOP to opt out.', 'dash-dolphin' );
+		echo '</div>';
+		echo '<div class="dd-prekey-phone-time">' . esc_html__( '12 seconds after submission', 'dash-dolphin' ) . '</div>';
+		echo '</div>';
+		echo '</div>';
+
+		echo '</div>'; // .dd-prekey-mockup-wrap
+		echo '</section>';
+
+		// Final CTA strip.
+		echo '<section class="dd-section">';
+		echo '<div class="dd-prekey-finalcta">';
+		echo '<div class="dd-prekey-finalcta-copy">';
+		echo '<h3 class="dd-h3">' . esc_html__( 'Ready to stop missing leads?', 'dash-dolphin' ) . '</h3>';
+		echo '<p>' . esc_html__( 'Add your Dash Dolphin API key on the License page to connect this site. New here? Start a trial first, then come back and paste your key.', 'dash-dolphin' ) . '</p>';
+		echo '</div>';
+		echo '<div class="dd-prekey-finalcta-buttons">';
+		printf(
+			'<a href="%s" class="button button-primary" target="_blank" rel="noopener">%s</a>',
+			esc_url( $trial_url ),
+			esc_html__( 'Start free trial', 'dash-dolphin' )
+		);
+		printf(
+			'<a href="%s" class="button">%s</a>',
+			esc_url( $license_url ),
+			esc_html__( 'Add API key', 'dash-dolphin' )
+		);
+		echo '</div>';
+		echo '</div>'; // .dd-prekey-finalcta
+		echo '</section>';
+	}
+
+	/**
+	 * Compact "no API key" notice used on Setup, Integrations, and (when
+	 * called from those page handlers) any other inner page. The full
+	 * sales pitch lives on the Dashboard.
+	 */
+	private function render_no_key_notice_compact(): void {
 		echo '<div class="dd-card dd-card--muted">';
 		echo '<p>' . esc_html__( 'Connect this site to your Dash Dolphin account to see your data.', 'dash-dolphin' ) . '</p>';
 		printf(
@@ -851,20 +947,34 @@ class DD_Settings_Page {
 			return;
 		}
 
-		echo '<table class="widefat striped dd-table dd-table--wp7">';
+		echo '<table class="widefat striped dd-table dd-table--wp7 dd-table--expandable">';
 		echo '<thead><tr>';
+		echo '<th class="dd-col-expand"><span class="screen-reader-text">' . esc_html__( 'Expand row', 'dash-dolphin' ) . '</span></th>';
 		echo '<th>' . esc_html__( 'Connection', 'dash-dolphin' ) . '</th>';
 		echo '<th>' . esc_html__( 'Connection Type', 'dash-dolphin' ) . '</th>';
 		echo '<th>' . esc_html__( 'Connection address', 'dash-dolphin' ) . '</th>';
 		echo '<th class="dd-col-actions"></th>';
 		echo '</tr></thead><tbody>';
+		$row_index = 0;
 		foreach ( $connections as $conn ) {
+			$row_index++;
 			$name       = isset( $conn['name'] ) ? (string) $conn['name'] : __( 'Untitled', 'dash-dolphin' );
 			$form_type  = isset( $conn['form_type'] ) ? (string) $conn['form_type'] : '';
 			$address    = isset( $conn['email_address'] ) ? (string) $conn['email_address'] : '';
 			$type_label = $form_type !== '' ? $this->humanize_form_type( $form_type ) : '—';
+			$phone      = isset( $conn['phone_number'] ) ? (string) $conn['phone_number'] : '';
+			$schedule   = isset( $conn['weekly_schedule'] ) && is_array( $conn['weekly_schedule'] ) ? $conn['weekly_schedule'] : array();
+			$timezone   = isset( $conn['timezone'] ) ? (string) $conn['timezone'] : '';
 
-			echo '<tr>';
+			$detail_id = 'dd-conn-detail-' . $row_index;
+
+			echo '<tr class="dd-row-main" data-dd-row="' . esc_attr( (string) $row_index ) . '">';
+			printf(
+				'<td class="dd-col-expand"><button type="button" class="dd-expand-toggle" aria-controls="%1$s" aria-expanded="false" data-dd-expand="%2$s"><span class="dd-expand-icon" aria-hidden="true">&#9656;</span><span class="screen-reader-text">%3$s</span></button></td>',
+				esc_attr( $detail_id ),
+				esc_attr( (string) $row_index ),
+				esc_html__( 'Show phone and schedule', 'dash-dolphin' )
+			);
 			echo '<td>' . esc_html( $name ) . '</td>';
 			echo '<td>' . esc_html( $type_label ) . '</td>';
 			echo '<td class="dd-cell-code"><code class="dd-code">' . esc_html( $address ) . '</code></td>';
@@ -876,6 +986,48 @@ class DD_Settings_Page {
 					esc_html__( 'Copy', 'dash-dolphin' )
 				);
 			}
+			echo '</td>';
+			echo '</tr>';
+
+			// Detail row: phone + schedule. Hidden by default; toggled by the
+			// caret button in the main row. We use a single colspan cell that
+			// spans columns 2-5, leaving column 1 empty to align with the
+			// expand caret above it.
+			printf(
+				'<tr class="dd-row-detail" id="%s" data-dd-row="%s" hidden>',
+				esc_attr( $detail_id ),
+				esc_attr( (string) $row_index )
+			);
+			echo '<td></td>';
+			echo '<td colspan="4" class="dd-detail-cell">';
+			echo '<div class="dd-detail-grid">';
+
+			// Phone block.
+			echo '<div class="dd-detail-item">';
+			echo '<div class="dd-detail-label">' . esc_html__( 'Routes alerts to', 'dash-dolphin' ) . '</div>';
+			if ( $phone !== '' ) {
+				echo '<div class="dd-detail-value">' . esc_html( $this->format_phone_number( $phone ) ) . '</div>';
+			} else {
+				echo '<div class="dd-detail-value dd-detail-value--muted">' . esc_html__( 'No phone assigned yet', 'dash-dolphin' ) . '</div>';
+			}
+			echo '</div>';
+
+			// Schedule block.
+			echo '<div class="dd-detail-item">';
+			echo '<div class="dd-detail-label">' . esc_html__( 'When SMS sends', 'dash-dolphin' ) . '</div>';
+			echo '<div class="dd-detail-value">' . esc_html( $this->humanize_schedule( $schedule, $timezone ) ) . '</div>';
+			echo '</div>';
+
+			echo '</div>'; // .dd-detail-grid
+
+			// Link out for changes (read-only plugin).
+			echo '<p class="dd-detail-help">';
+			$this->render_dashboard_link(
+				$this->plugin->get_dashboard_url() . '/dashboard',
+				__( 'Edit phone or schedule in dashboard', 'dash-dolphin' )
+			);
+			echo '</p>';
+
 			echo '</td>';
 			echo '</tr>';
 		}
@@ -1023,6 +1175,174 @@ class DD_Settings_Page {
 			'formidable'    => __( 'Formidable Forms', 'dash-dolphin' ),
 		);
 		return $labels[ $form_type ] ?? ucfirst( str_replace( '-', ' ', $form_type ) );
+	}
+
+	/**
+	 * Format a stored E.164-ish phone string as a friendly US number when
+	 * possible. Falls back to the raw value for non-US numbers, which the
+	 * Dash Dolphin app supports but we don't try to pretty-print here.
+	 */
+	private function format_phone_number( string $raw ): string {
+		$digits = preg_replace( '/[^0-9]/', '', $raw );
+		if ( null === $digits || '' === $digits ) {
+			return $raw;
+		}
+		if ( strlen( $digits ) === 11 && $digits[0] === '1' ) {
+			return sprintf( '(%s) %s-%s', substr( $digits, 1, 3 ), substr( $digits, 4, 3 ), substr( $digits, 7, 4 ) );
+		}
+		if ( strlen( $digits ) === 10 ) {
+			return sprintf( '(%s) %s-%s', substr( $digits, 0, 3 ), substr( $digits, 3, 3 ), substr( $digits, 6, 4 ) );
+		}
+		return $raw;
+	}
+
+	/**
+	 * Translate an IANA timezone like "America/Chicago" into the short
+	 * abbreviation a service-business owner expects ("CT"). We don't try
+	 * to be daylight-saving aware here: the alerts dashboard owns the
+	 * authoritative schedule, this is a label for the read-only summary.
+	 */
+	private function timezone_short_label( string $iana ): string {
+		$map = array(
+			'America/New_York'    => 'ET',
+			'America/Detroit'     => 'ET',
+			'America/Chicago'     => 'CT',
+			'America/Denver'      => 'MT',
+			'America/Phoenix'     => 'MT',
+			'America/Los_Angeles' => 'PT',
+			'America/Anchorage'   => 'AKT',
+			'Pacific/Honolulu'    => 'HT',
+		);
+		if ( isset( $map[ $iana ] ) ) {
+			return $map[ $iana ];
+		}
+		if ( strpos( $iana, '/' ) !== false ) {
+			$parts = explode( '/', $iana );
+			return str_replace( '_', ' ', end( $parts ) );
+		}
+		return $iana;
+	}
+
+	/**
+	 * Format an HH:MM clock string into a compact display like "9am" or
+	 * "5:30pm". Used by humanize_schedule for custom windows.
+	 */
+	private function format_clock_time( string $hhmm ): string {
+		$ts = strtotime( '2000-01-01 ' . $hhmm );
+		if ( ! $ts ) {
+			return $hhmm;
+		}
+		$min = (int) gmdate( 'i', $ts );
+		return gmdate( $min === 0 ? 'ga' : 'g:ia', $ts );
+	}
+
+	/**
+	 * Render a weekly_schedule jsonb blob as a one-line human summary, e.g.
+	 * "24/7 (CT)" or "Mon-Fri 9am-5pm CT, Sat 10am-2pm CT".
+	 *
+	 * Per-day shape (keys may be capitalized or lowercase):
+	 *   { openTime: '24hours' }              -> always-on that day
+	 *   { openTime: 'HH:MM', closeTime: ...} -> custom window
+	 *   absent / disabled                     -> off that day
+	 *
+	 * An empty {} blob is treated as 24/7 because the routing engine sends
+	 * alerts whenever no schedule is configured.
+	 */
+	private function humanize_schedule( array $schedule, string $timezone ): string {
+		$tz_label = $this->timezone_short_label( $timezone !== '' ? $timezone : 'America/New_York' );
+
+		if ( empty( $schedule ) ) {
+			return sprintf( '24/7 (%s)', $tz_label );
+		}
+
+		$days_order = array( 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday' );
+		$day_short  = array(
+			'monday'    => 'Mon',
+			'tuesday'   => 'Tue',
+			'wednesday' => 'Wed',
+			'thursday'  => 'Thu',
+			'friday'    => 'Fri',
+			'saturday'  => 'Sat',
+			'sunday'    => 'Sun',
+		);
+
+		// Normalize keys to lowercase so we accept both "Monday" and "monday".
+		$norm = array();
+		foreach ( $schedule as $k => $v ) {
+			$norm[ strtolower( (string) $k ) ] = $v;
+		}
+
+		// Per-day status: 'off' | '24h' | 'HH:MM-HH:MM'.
+		$status_by_day = array();
+		foreach ( $days_order as $day ) {
+			$cfg = isset( $norm[ $day ] ) && is_array( $norm[ $day ] ) ? $norm[ $day ] : null;
+			if ( null === $cfg ) {
+				$status_by_day[ $day ] = '24h';
+				continue;
+			}
+			$open = isset( $cfg['openTime'] ) ? (string) $cfg['openTime'] : '';
+			if ( '24hours' === $open ) {
+				$status_by_day[ $day ] = '24h';
+			} elseif ( '' === $open || 'disabled' === $open ) {
+				$status_by_day[ $day ] = 'off';
+			} else {
+				$close = isset( $cfg['closeTime'] ) ? (string) $cfg['closeTime'] : '';
+				if ( '' === $close ) {
+					$status_by_day[ $day ] = 'off';
+				} else {
+					$status_by_day[ $day ] = $open . '-' . $close;
+				}
+			}
+		}
+
+		// Easy cases.
+		$all_24h = true;
+		$all_off = true;
+		foreach ( $status_by_day as $s ) {
+			if ( '24h' !== $s ) { $all_24h = false; }
+			if ( 'off' !== $s ) { $all_off = false; }
+		}
+		if ( $all_24h ) { return sprintf( '24/7 (%s)', $tz_label ); }
+		if ( $all_off ) { return __( 'No days scheduled', 'dash-dolphin' ); }
+
+		// Group contiguous runs that share the same status.
+		$runs = array();
+		$cur  = null;
+		foreach ( $days_order as $idx => $day ) {
+			$s = $status_by_day[ $day ];
+			if ( null === $cur ) {
+				$cur = array( 'start' => $idx, 'end' => $idx, 'status' => $s );
+			} elseif ( $cur['status'] === $s ) {
+				$cur['end'] = $idx;
+			} else {
+				$runs[] = $cur;
+				$cur    = array( 'start' => $idx, 'end' => $idx, 'status' => $s );
+			}
+		}
+		if ( null !== $cur ) { $runs[] = $cur; }
+
+		$parts = array();
+		foreach ( $runs as $run ) {
+			if ( 'off' === $run['status'] ) {
+				continue;
+			}
+			$start_label = $day_short[ $days_order[ $run['start'] ] ];
+			$end_label   = $day_short[ $days_order[ $run['end'] ] ];
+			$range_label = $run['start'] === $run['end'] ? $start_label : $start_label . '-' . $end_label;
+
+			if ( '24h' === $run['status'] ) {
+				$parts[] = $range_label . ' ' . __( '24h', 'dash-dolphin' );
+			} else {
+				$times   = explode( '-', $run['status'], 2 );
+				$parts[] = $range_label . ' ' . $this->format_clock_time( $times[0] ) . '-' . $this->format_clock_time( $times[1] );
+			}
+		}
+
+		if ( empty( $parts ) ) {
+			return __( 'No days scheduled', 'dash-dolphin' );
+		}
+
+		return implode( ', ', $parts ) . ' ' . $tz_label;
 	}
 
 	/**

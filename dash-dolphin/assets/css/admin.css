@@ -995,3 +995,234 @@
 .dd-profile-callout .dd-help {
 	margin: 0;
 }
+
+/* =====================================================================
+   v0.3.4: Expandable connection rows (phone + schedule detail)
+   ===================================================================== */
+
+.dd-table--expandable .dd-col-expand {
+	width: 36px;
+	padding: 6px 4px;
+}
+.dd-expand-toggle {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	width: 24px;
+	height: 24px;
+	padding: 0;
+	border: 1px solid transparent;
+	border-radius: 6px;
+	background: transparent;
+	color: var(--dd-text-muted);
+	cursor: pointer;
+	transition: background-color 120ms ease, color 120ms ease, transform 120ms ease;
+}
+.dd-expand-toggle:hover,
+.dd-expand-toggle:focus {
+	background: var(--dd-muted-bg);
+	color: var(--dd-brand-purple);
+	outline: none;
+}
+.dd-expand-toggle:focus-visible {
+	box-shadow: 0 0 0 2px rgba(124, 58, 237, 0.25);
+}
+.dd-expand-icon {
+	display: inline-block;
+	font-size: 12px;
+	line-height: 1;
+	transition: transform 150ms ease;
+}
+.dd-expand-toggle[aria-expanded="true"] .dd-expand-icon {
+	transform: rotate(90deg);
+}
+
+.dd-row-detail .dd-detail-cell {
+	background: var(--dd-muted-bg, #f7f5fb);
+	padding: 14px 16px 16px;
+	border-top: 1px dashed rgba(124, 58, 237, 0.18);
+}
+.dd-detail-grid {
+	display: grid;
+	grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+	gap: 12px 24px;
+	margin-bottom: 8px;
+}
+.dd-detail-item {
+	display: flex;
+	flex-direction: column;
+	gap: 2px;
+}
+.dd-detail-label {
+	font-size: 11px;
+	font-weight: 600;
+	text-transform: uppercase;
+	letter-spacing: 0.04em;
+	color: var(--dd-text-muted);
+}
+.dd-detail-value {
+	font-size: 14px;
+	font-weight: 600;
+	color: var(--dd-text);
+}
+.dd-detail-value--muted {
+	color: var(--dd-text-muted);
+	font-weight: 500;
+	font-style: italic;
+}
+.dd-detail-help {
+	margin: 6px 0 0;
+	font-size: 12px;
+}
+
+/* =====================================================================
+   v0.3.4: Pre-API-key sales pitch on Dashboard
+   ===================================================================== */
+
+.dd-prekey-hero {
+	background: linear-gradient(135deg, #faf7ff 0%, #f1eaff 100%);
+	border: 1px solid rgba(124, 58, 237, 0.18);
+	border-radius: 14px;
+	padding: 28px 32px;
+}
+.dd-prekey-eyebrow {
+	font-size: 12px;
+	font-weight: 700;
+	text-transform: uppercase;
+	letter-spacing: 0.08em;
+	color: var(--dd-brand-purple);
+	margin-bottom: 8px;
+}
+.dd-prekey-title {
+	font-size: 24px;
+	line-height: 1.25;
+	font-weight: 700;
+	margin: 0 0 12px;
+	color: var(--dd-text);
+}
+.dd-prekey-lede {
+	font-size: 15px;
+	line-height: 1.55;
+	color: var(--dd-text);
+	margin: 0 0 18px;
+	max-width: 70ch;
+}
+.dd-prekey-ctas {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 10px;
+	margin-bottom: 10px;
+}
+.dd-prekey-cta-primary.button-primary {
+	height: auto;
+	padding: 8px 18px;
+	font-size: 14px;
+}
+.dd-prekey-cta-secondary.button {
+	height: auto;
+	padding: 8px 18px;
+	font-size: 14px;
+}
+.dd-prekey-foot {
+	margin: 6px 0 0;
+	font-size: 12px;
+	color: var(--dd-text-muted);
+}
+
+.dd-prekey-mockup-wrap {
+	display: grid;
+	grid-template-columns: minmax(0, 1fr) minmax(220px, 280px);
+	gap: 32px;
+	align-items: center;
+	background: #fff;
+	border: 1px solid var(--dd-border, #e4e2ec);
+	border-radius: 14px;
+	padding: 24px 28px;
+}
+.dd-prekey-mockup-copy .dd-h3 {
+	margin: 0 0 8px;
+	font-size: 18px;
+	font-weight: 700;
+}
+.dd-prekey-list {
+	margin: 12px 0 0;
+	padding-left: 18px;
+	font-size: 14px;
+	line-height: 1.6;
+	color: var(--dd-text);
+}
+.dd-prekey-list li {
+	margin: 4px 0;
+}
+
+/* Mock phone bubble (CSS-only). */
+.dd-prekey-phone {
+	display: flex;
+	justify-content: center;
+}
+.dd-prekey-phone-bezel {
+	background: #1f1f23;
+	border-radius: 22px;
+	padding: 14px 12px 18px;
+	width: 100%;
+	max-width: 260px;
+	box-shadow: 0 12px 30px rgba(31, 31, 35, 0.18);
+}
+.dd-prekey-phone-bar {
+	color: #fff;
+	font-size: 11px;
+	opacity: 0.78;
+	margin-bottom: 8px;
+	text-align: center;
+}
+.dd-prekey-phone-msg {
+	background: #2c3e9e;
+	color: #fff;
+	padding: 10px 12px;
+	border-radius: 14px 14px 14px 4px;
+	font-size: 13px;
+	line-height: 1.45;
+}
+.dd-prekey-phone-time {
+	margin-top: 6px;
+	font-size: 11px;
+	color: #b8b5c1;
+	text-align: right;
+}
+
+.dd-prekey-finalcta {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 18px;
+	align-items: center;
+	justify-content: space-between;
+	background: var(--dd-muted-bg, #f7f5fb);
+	border: 1px solid var(--dd-border, #e4e2ec);
+	border-radius: 14px;
+	padding: 22px 28px;
+}
+.dd-prekey-finalcta-copy .dd-h3 {
+	margin: 0 0 4px;
+	font-size: 18px;
+	font-weight: 700;
+}
+.dd-prekey-finalcta-copy p {
+	margin: 0;
+	color: var(--dd-text-muted);
+	font-size: 14px;
+	max-width: 60ch;
+}
+.dd-prekey-finalcta-buttons {
+	display: flex;
+	gap: 10px;
+	flex-wrap: wrap;
+}
+
+@media (max-width: 782px) {
+	.dd-prekey-mockup-wrap {
+		grid-template-columns: 1fr;
+	}
+	.dd-prekey-title {
+		font-size: 20px;
+	}
+}
