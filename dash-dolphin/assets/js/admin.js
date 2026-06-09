@@ -203,37 +203,4 @@
 	}
 
 	document.addEventListener( 'click', handleDashboardLinkClick );
-
-	/**
-	 * Expand/collapse handler for the Setup connections table detail rows.
-	 *
-	 * Each main row has a [data-dd-expand="N"] button. Its sibling detail
-	 * row carries [data-dd-row="N"] and the `hidden` attribute. We swap
-	 * the `hidden` attribute on click and flip aria-expanded + the caret
-	 * rotation (CSS handles the visual).
-	 */
-	function handleExpandToggleClick( ev ) {
-		var btn = ev.target.closest( '.dd-expand-toggle[data-dd-expand]' );
-		if ( ! btn ) {
-			return;
-		}
-		ev.preventDefault();
-		var idx = btn.getAttribute( 'data-dd-expand' );
-		if ( ! idx ) {
-			return;
-		}
-		var detail = document.querySelector( 'tr.dd-row-detail[data-dd-row="' + idx + '"]' );
-		if ( ! detail ) {
-			return;
-		}
-		var isExpanded = btn.getAttribute( 'aria-expanded' ) === 'true';
-		if ( isExpanded ) {
-			detail.setAttribute( 'hidden', '' );
-			btn.setAttribute( 'aria-expanded', 'false' );
-		} else {
-			detail.removeAttribute( 'hidden' );
-			btn.setAttribute( 'aria-expanded', 'true' );
-		}
-	}
-	document.addEventListener( 'click', handleExpandToggleClick );
 } )();

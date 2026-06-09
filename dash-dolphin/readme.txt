@@ -4,7 +4,7 @@ Tags: sms, form notifications, sms alerts, contact form sms, lead alerts
 Requires at least: 6.0
 Tested up to: 6.6
 Requires PHP: 7.4
-Stable tag: 0.3.0
+Stable tag: 0.3.5
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -108,6 +108,12 @@ That happens when your dashboard browser session is signed into a different Dash
 
 == Changelog ==
 
+= 0.3.5 =
+* Improved: Setup connections detail row (assigned phone, schedule, timezone) is always visible, no longer behind a click-to-expand toggle.
+* Improved: Pre-key Dashboard copy. Hero lede tightened, trial call-to-action now routes to app.dashdolphin.com/signup with a WordPress-source UTM, and trial footnote correctly references the 14-day trial and 60-day money-back guarantee.
+* Improved: Sample SMS mockup is more representative (extended lead detail, removed STOP boilerplate) and the supporting bullet calls out tap-to-call plus off-hours SMS scheduling.
+* Improved: License page now points to the user profile page in your Dash Dolphin dashboard for generating or rotating API keys.
+
 = 0.3.4 =
 * New: Expandable row on the Setup connections table reveals the phone number that receives alerts and the routing schedule for that connection (read-only view of what's configured in your Dash Dolphin dashboard).
 * New: Dashboard tab now leads with a value-prop hero, speed-of-response stats, sample SMS mockup, and a clear "Start free trial / Add API key" dual call-to-action when no API key is configured. Helpful for admins who installed the plugin without context.
@@ -155,6 +161,9 @@ That happens when your dashboard browser session is signed into a different Dash
 * Initial development scaffold.
 
 == Upgrade Notice ==
+
+= 0.3.5 =
+Copy and layout polish on the pre-key Dashboard and Setup pages. Connection detail row is now always visible. Safe upgrade.
 
 = 0.3.4 =
 Setup page now shows the assigned phone and schedule per connection (click the row to expand). Dashboard is also more useful before you've added an API key, with a clear product explainer and trial CTA. Safe upgrade.

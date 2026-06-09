@@ -997,48 +997,19 @@
 }
 
 /* =====================================================================
-   v0.3.4: Expandable connection rows (phone + schedule detail)
+   v0.3.4: Connection detail row (phone + schedule, always visible)
    ===================================================================== */
 
-.dd-table--expandable .dd-col-expand {
-	width: 36px;
-	padding: 6px 4px;
+/* Override .striped zebra so the detail row reads as a continuation of
+   its parent main row, not as a separate striped row of its own. */
+.dd-table--withdetail tbody tr.dd-row-detail,
+.dd-table--withdetail tbody tr.dd-row-detail td {
+	background: var(--dd-muted-bg, #f7f5fb) !important;
 }
-.dd-expand-toggle {
-	display: inline-flex;
-	align-items: center;
-	justify-content: center;
-	width: 24px;
-	height: 24px;
-	padding: 0;
-	border: 1px solid transparent;
-	border-radius: 6px;
-	background: transparent;
-	color: var(--dd-text-muted);
-	cursor: pointer;
-	transition: background-color 120ms ease, color 120ms ease, transform 120ms ease;
+.dd-table--withdetail tbody tr.dd-row-main td {
+	border-bottom: 0;
 }
-.dd-expand-toggle:hover,
-.dd-expand-toggle:focus {
-	background: var(--dd-muted-bg);
-	color: var(--dd-brand-purple);
-	outline: none;
-}
-.dd-expand-toggle:focus-visible {
-	box-shadow: 0 0 0 2px rgba(124, 58, 237, 0.25);
-}
-.dd-expand-icon {
-	display: inline-block;
-	font-size: 12px;
-	line-height: 1;
-	transition: transform 150ms ease;
-}
-.dd-expand-toggle[aria-expanded="true"] .dd-expand-icon {
-	transform: rotate(90deg);
-}
-
 .dd-row-detail .dd-detail-cell {
-	background: var(--dd-muted-bg, #f7f5fb);
 	padding: 14px 16px 16px;
 	border-top: 1px dashed rgba(124, 58, 237, 0.18);
 }

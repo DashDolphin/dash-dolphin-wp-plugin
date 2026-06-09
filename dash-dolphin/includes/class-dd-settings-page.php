@@ -685,7 +685,8 @@ class DD_Settings_Page {
 	 */
 	private function render_no_key_notice(): void {
 		$license_url  = $this->plugin->get_page_url( DD_Plugin::PAGE_LICENSE );
-		$trial_url    = 'https://www.dashdolphin.com/'; // marketing site handles signup
+		// Signup with UTM so we can attribute trials to the WP plugin admin pre-key state.
+		$trial_url    = 'https://app.dashdolphin.com/signup?utm_source=wordpress&utm_medium=plugin&utm_campaign=prekey_dashboard';
 
 		echo '<section class="dd-section">';
 
@@ -693,7 +694,7 @@ class DD_Settings_Page {
 		echo '<div class="dd-prekey-hero">';
 		echo '<div class="dd-prekey-eyebrow">' . esc_html__( 'What is Dash Dolphin?', 'dash-dolphin' ) . '</div>';
 		echo '<h2 class="dd-prekey-title">' . esc_html__( 'Instant SMS alerts and smart summaries the moment a form is submitted.', 'dash-dolphin' ) . '</h2>';
-		echo '<p class="dd-prekey-lede">' . esc_html__( 'When a lead fills out a form on your site, Dash Dolphin reads it, writes a one-line summary, and texts you in seconds, before your competitor checks their email. Customers reply, you reply. Jobs get booked.', 'dash-dolphin' ) . '</p>';
+		echo '<p class="dd-prekey-lede">' . esc_html__( 'When a lead fills out a form on your site, Dash Dolphin reads it, writes a one-line summary, and texts you in seconds, before your competitor checks their email.', 'dash-dolphin' ) . '</p>';
 
 		echo '<div class="dd-prekey-ctas">';
 		printf(
@@ -708,7 +709,7 @@ class DD_Settings_Page {
 		);
 		echo '</div>';
 
-		echo '<p class="dd-prekey-foot">' . esc_html__( 'A 14-day free trial includes inquiry summaries, instant alerts to two phones, and routing schedules. No credit card needed.', 'dash-dolphin' ) . '</p>';
+		echo '<p class="dd-prekey-foot">' . esc_html__( '14-day free trial backed by a 60-day money-back guarantee.', 'dash-dolphin' ) . '</p>';
 		echo '</div>'; // .dd-prekey-hero
 
 		echo '</section>';
@@ -722,11 +723,11 @@ class DD_Settings_Page {
 		echo '<div class="dd-prekey-mockup-wrap">';
 		echo '<div class="dd-prekey-mockup-copy">';
 		echo '<h3 class="dd-h3">' . esc_html__( 'What you actually get on your phone', 'dash-dolphin' ) . '</h3>';
-		echo '<p>' . esc_html__( 'No more digging through email. A clean summary, the customer\'s phone, and a tap to reply, all in the first text.', 'dash-dolphin' ) . '</p>';
+		echo '<p>' . esc_html__( 'No more digging through email. A clean summary, the customer\'s phone, and a tap to call, all in the first text.', 'dash-dolphin' ) . '</p>';
 		echo '<ul class="dd-prekey-list">';
 		echo '<li>' . esc_html__( 'One-line inquiry summary written for you', 'dash-dolphin' ) . '</li>';
 		echo '<li>' . esc_html__( 'Customer phone pre-formatted so a tap calls them back', 'dash-dolphin' ) . '</li>';
-		echo '<li>' . esc_html__( 'Routes to up to two phones with a routing schedule per connection', 'dash-dolphin' ) . '</li>';
+		echo '<li>' . esc_html__( 'SMS scheduling so off-hours leads wait until you\'re ready', 'dash-dolphin' ) . '</li>';
 		echo '<li>' . esc_html__( 'Smart filtering catches spam and test submissions', 'dash-dolphin' ) . '</li>';
 		echo '</ul>';
 		echo '</div>';
@@ -736,7 +737,7 @@ class DD_Settings_Page {
 		echo '<div class="dd-prekey-phone-bezel">';
 		echo '<div class="dd-prekey-phone-bar"><span class="dd-prekey-phone-handle">🟣 Dash Dolphin</span></div>';
 		echo '<div class="dd-prekey-phone-msg">';
-		echo esc_html__( 'New Request Form: Jamie L. wants a garage door spring replaced ASAP. Phone: (501) 555-0123. Reply STOP to opt out.', 'dash-dolphin' );
+		echo esc_html__( 'New Request Form: Jamie L. wants a garage door spring replaced ASAP for a double door at zip code 74103. Phone: (501) 555-0123.', 'dash-dolphin' );
 		echo '</div>';
 		echo '<div class="dd-prekey-phone-time">' . esc_html__( '12 seconds after submission', 'dash-dolphin' ) . '</div>';
 		echo '</div>';
@@ -803,16 +804,16 @@ class DD_Settings_Page {
 		);
 		submit_button( __( 'Save key', 'dash-dolphin' ), 'primary', 'submit', false );
 		echo '</div>';
-		$dashboard_link = sprintf(
+		$profile_link = sprintf(
 			'<a href="%s" target="_blank" rel="noopener">%s</a>',
-			esc_url( $this->plugin->get_dashboard_url() ),
-			esc_html__( 'Dash Dolphin dashboard', 'dash-dolphin' )
+			esc_url( $this->plugin->get_dashboard_url() . '/dashboard?section=settings' ),
+			esc_html__( 'user profile page', 'dash-dolphin' )
 		);
 		echo '<p class="dd-help">' . wp_kses(
 			sprintf(
-				/* translators: %s is an <a> link to the Dash Dolphin dashboard. */
-				__( 'Generate or rotate keys in your %s.', 'dash-dolphin' ),
-				$dashboard_link
+				/* translators: %s is an <a> link to the user profile page in the Dash Dolphin dashboard. */
+				__( 'Generate or rotate keys on the %s in your Dash Dolphin dashboard.', 'dash-dolphin' ),
+				$profile_link
 			),
 			array( 'a' => array( 'href' => array(), 'target' => array(), 'rel' => array() ) )
 		) . '</p>';
@@ -947,17 +948,14 @@ class DD_Settings_Page {
 			return;
 		}
 
-		echo '<table class="widefat striped dd-table dd-table--wp7 dd-table--expandable">';
+		echo '<table class="widefat striped dd-table dd-table--wp7 dd-table--withdetail">';
 		echo '<thead><tr>';
-		echo '<th class="dd-col-expand"><span class="screen-reader-text">' . esc_html__( 'Expand row', 'dash-dolphin' ) . '</span></th>';
 		echo '<th>' . esc_html__( 'Connection', 'dash-dolphin' ) . '</th>';
 		echo '<th>' . esc_html__( 'Connection Type', 'dash-dolphin' ) . '</th>';
 		echo '<th>' . esc_html__( 'Connection address', 'dash-dolphin' ) . '</th>';
 		echo '<th class="dd-col-actions"></th>';
 		echo '</tr></thead><tbody>';
-		$row_index = 0;
 		foreach ( $connections as $conn ) {
-			$row_index++;
 			$name       = isset( $conn['name'] ) ? (string) $conn['name'] : __( 'Untitled', 'dash-dolphin' );
 			$form_type  = isset( $conn['form_type'] ) ? (string) $conn['form_type'] : '';
 			$address    = isset( $conn['email_address'] ) ? (string) $conn['email_address'] : '';
@@ -966,15 +964,7 @@ class DD_Settings_Page {
 			$schedule   = isset( $conn['weekly_schedule'] ) && is_array( $conn['weekly_schedule'] ) ? $conn['weekly_schedule'] : array();
 			$timezone   = isset( $conn['timezone'] ) ? (string) $conn['timezone'] : '';
 
-			$detail_id = 'dd-conn-detail-' . $row_index;
-
-			echo '<tr class="dd-row-main" data-dd-row="' . esc_attr( (string) $row_index ) . '">';
-			printf(
-				'<td class="dd-col-expand"><button type="button" class="dd-expand-toggle" aria-controls="%1$s" aria-expanded="false" data-dd-expand="%2$s"><span class="dd-expand-icon" aria-hidden="true">&#9656;</span><span class="screen-reader-text">%3$s</span></button></td>',
-				esc_attr( $detail_id ),
-				esc_attr( (string) $row_index ),
-				esc_html__( 'Show phone and schedule', 'dash-dolphin' )
-			);
+			echo '<tr class="dd-row-main">';
 			echo '<td>' . esc_html( $name ) . '</td>';
 			echo '<td>' . esc_html( $type_label ) . '</td>';
 			echo '<td class="dd-cell-code"><code class="dd-code">' . esc_html( $address ) . '</code></td>';
@@ -989,16 +979,8 @@ class DD_Settings_Page {
 			echo '</td>';
 			echo '</tr>';
 
-			// Detail row: phone + schedule. Hidden by default; toggled by the
-			// caret button in the main row. We use a single colspan cell that
-			// spans columns 2-5, leaving column 1 empty to align with the
-			// expand caret above it.
-			printf(
-				'<tr class="dd-row-detail" id="%s" data-dd-row="%s" hidden>',
-				esc_attr( $detail_id ),
-				esc_attr( (string) $row_index )
-			);
-			echo '<td></td>';
+			// Always-visible detail row: phone + schedule for this connection.
+			echo '<tr class="dd-row-detail">';
 			echo '<td colspan="4" class="dd-detail-cell">';
 			echo '<div class="dd-detail-grid">';
 
